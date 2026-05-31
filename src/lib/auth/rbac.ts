@@ -41,7 +41,7 @@ const CAPABILITY_ROLES: Record<Capability, Role[]> = {
   "payouts.view": ALL,
   "payouts.updateStatus": ["SUPER_ADMIN", "ADMIN", "OPS"],
   "rates.view": ALL,
-  "rates.manage": ["SUPER_ADMIN", "ADMIN", "OPS"],
+  "rates.manage": ["SUPER_ADMIN", "ADMIN"],
   "wallets.view": ["SUPER_ADMIN", "ADMIN", "OPS"],
   "wallets.manage": ["SUPER_ADMIN", "ADMIN", "OPS"],
   "assets.view": ["SUPER_ADMIN", "ADMIN"],

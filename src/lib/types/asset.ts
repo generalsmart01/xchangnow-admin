@@ -12,10 +12,24 @@ export type Asset = {
   iconUrl: string | null;
   isEnabled: boolean;
   sortOrder: number;
+  /** USD spot price (decimal string). CoinGecko auto-fetches; stablecoins pinned. */
+  priceUsd: string | null;
+  priceUsdSource: string | null;
+  /** When true, the CoinGecko poller skips this asset (admin price is pinned). */
+  priceUsdManualOverride: boolean;
+  priceUsdUpdatedAt: string | null;
+  coinGeckoId: string | null;
   createdAt: string;
   updatedAt: string;
   /** Present on detail / create responses; lists may include it too. */
   networks?: AssetNetworkPair[];
+};
+
+/** Body for PATCH /admin/assets/:id/price-usd. */
+export type SetAssetPriceUsdBody = {
+  priceUsd: string;
+  /** Pin the price so the CoinGecko poller stops overwriting it. */
+  manualOverride?: boolean;
 };
 
 export type AssetsListResponse = {
@@ -51,4 +65,6 @@ export type EmbeddedAsset = {
   name: string;
   decimals: number;
   iconUrl?: string | null;
+  /** Present on transaction-embedded assets (USD spot at read time). */
+  priceUsd?: string | null;
 };

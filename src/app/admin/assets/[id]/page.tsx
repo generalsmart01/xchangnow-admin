@@ -12,6 +12,7 @@ import { LoadingBlock } from "@/components/shared/loading-spinner";
 import { EmptyState } from "@/components/shared/empty-state";
 import { AssetIcon } from "@/components/shared/asset-icon";
 import { AssetForm } from "@/components/assets/asset-form";
+import { AssetPriceCard } from "@/components/assets/asset-price-card";
 import { AssetNetworksPanel } from "@/components/assets/asset-networks-panel";
 import { getAsset } from "@/lib/api/assets";
 import { ApiError } from "@/lib/api/client";
@@ -71,6 +72,8 @@ export default function AssetDetailPage() {
               <AssetForm asset={asset} />
             </CardContent>
           </Card>
+
+          <AssetPriceCard asset={asset} />
 
           <AssetNetworksPanel asset={asset} />
         </>

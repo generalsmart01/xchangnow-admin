@@ -1,8 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Power, Trash2, Coins } from "lucide-react";
+import {
+  DollarSign,
+  MoreHorizontal,
+  Pencil,
+  Power,
+  Trash2,
+  Coins,
+} from "lucide-react";
 
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -17,14 +25,34 @@ import {
 import { ToneBadge } from "@/components/shared/tone-badge";
 import { AssetIcon } from "@/components/shared/asset-icon";
 import { RoleGate } from "@/components/layout/role-gate";
+import { SetPriceDialog } from "./set-price-dialog";
 import { useConfirm } from "@/lib/hooks/use-confirm";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import { deleteAsset, setAssetEnabled } from "@/lib/api/assets";
+import { money } from "@/lib/format";
 import type { Asset } from "@/lib/types/asset";
+
+/** Asset USD price cell: value + source/pinned hint. */
+function PriceCell({ asset }: { asset: Asset }) {
+  if (asset.priceUsd == null) {
+    return <span className="text-sm text-muted-foreground">—</span>;
+  }
+  return (
+    <div className="flex flex-col">
+      <span className="tabular-nums">{money(asset.priceUsd, "USD")}</span>
+      {asset.priceUsdManualOverride ? (
+        <span className="text-xs text-warning-foreground">pinned</span>
+      ) : asset.priceUsdSource ? (
+        <span className="text-xs text-muted-foreground">{asset.priceUsdSource}</span>
+      ) : null}
+    </div>
+  );
+}
 
 function RowActions({ asset }: { asset: Asset }) {
   const router = useRouter();
   const confirm = useConfirm();
+  const [priceOpen, setPriceOpen] = useState(false);
 
   const toggle = useMutationToast<Asset, boolean>(
     (enabled) => setAssetEnabled(asset.id, enabled).then((r) => r.data),
@@ -40,47 +68,54 @@ function RowActions({ asset }: { asset: Asset }) {
   );
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-        <Button variant="ghost" size="icon" className="size-8">
-          <MoreHorizontal className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-        <DropdownMenuItem onSelect={() => router.push(`/admin/assets/${asset.id}`)}>
-          <Pencil className="size-4" /> Manage
-        </DropdownMenuItem>
-        <RoleGate cap="assets.manage">
-          <DropdownMenuItem
-            disabled={toggle.isPending}
-            onSelect={(e) => {
-              e.preventDefault();
-              toggle.mutate(!asset.isEnabled);
-            }}
-          >
-            <Power className="size-4" /> {asset.isEnabled ? "Disable" : "Enable"}
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+          <Button variant="ghost" size="icon" className="size-8">
+            <MoreHorizontal className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenuItem onSelect={() => router.push(`/admin/assets/${asset.id}`)}>
+            <Pencil className="size-4" /> Manage
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            variant="destructive"
-            disabled={remove.isPending}
-            onSelect={async (e) => {
-              e.preventDefault();
-              const ok = await confirm({
-                title: `Delete ${asset.symbol}?`,
-                description:
-                  "This permanently removes the asset. It will fail if any pairs or transactions reference it — disable it instead.",
-                confirmText: "Delete",
-                variant: "destructive",
-              });
-              if (ok) remove.mutate();
-            }}
-          >
-            <Trash2 className="size-4" /> Delete
-          </DropdownMenuItem>
-        </RoleGate>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <RoleGate cap="assets.manage">
+            <DropdownMenuItem onSelect={() => setPriceOpen(true)}>
+              <DollarSign className="size-4" /> Set USD price
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={toggle.isPending}
+              onSelect={(e) => {
+                e.preventDefault();
+                toggle.mutate(!asset.isEnabled);
+              }}
+            >
+              <Power className="size-4" /> {asset.isEnabled ? "Disable" : "Enable"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={remove.isPending}
+              onSelect={async (e) => {
+                e.preventDefault();
+                const ok = await confirm({
+                  title: `Delete ${asset.symbol}?`,
+                  description:
+                    "This permanently removes the asset. It will fail if any pairs or transactions reference it — disable it instead.",
+                  confirmText: "Delete",
+                  variant: "destructive",
+                });
+                if (ok) remove.mutate();
+              }}
+            >
+              <Trash2 className="size-4" /> Delete
+            </DropdownMenuItem>
+          </RoleGate>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <SetPriceDialog asset={asset} open={priceOpen} onOpenChange={setPriceOpen} />
+    </>
   );
 }
 
@@ -100,6 +135,10 @@ const columns: ColumnDef<Asset>[] = [
   {
     header: "Decimals",
     cell: ({ row }) => <span className="tabular-nums">{row.original.decimals}</span>,
+  },
+  {
+    header: "Price (USD)",
+    cell: ({ row }) => <PriceCell asset={row.original} />,
   },
   {
     header: "Networks",

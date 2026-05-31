@@ -21,9 +21,11 @@ import { PayoutStatusBadge } from "@/components/payouts/payout-status-badge";
 import { KycStatusBadge } from "@/components/kyc/kyc-status-badge";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { DateTimeDisplay } from "@/components/shared/datetime-display";
+import { CurrentFxCard } from "@/components/rates/current-rates-card";
 import { listTransactions } from "@/lib/api/transactions";
 import { listPayouts } from "@/lib/api/payouts";
 import { listKyc } from "@/lib/api/kyc";
+import { listRates } from "@/lib/api/rates";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { fullName } from "@/lib/format";
 
@@ -86,6 +88,10 @@ export default function DashboardPage() {
     queryFn: () =>
       listTransactions({ status: "APPROVED", pageSize: 1 }).then((r) => r.data),
   });
+  const fx = useQuery({
+    queryKey: ["rates", { pageSize: 1 }],
+    queryFn: () => listRates({ pageSize: 1 }).then((r) => r.data),
+  });
 
   return (
     <div className="space-y-6">
@@ -132,6 +138,12 @@ export default function DashboardPage() {
           hint="Approved, not yet completed"
         />
       </div>
+
+      <CurrentFxCard
+        rate={fx.data?.rates[0]}
+        loading={fx.isLoading}
+        href="/admin/rates"
+      />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <QueueCard

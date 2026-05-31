@@ -1,13 +1,12 @@
 import { apiDelete, apiGet, apiPatch, apiPost, qs } from "./client";
 import type {
   CreateRateBody,
-  RateSnapshot,
+  FxRate,
   RatesListResponse,
   UpdateRateBody,
 } from "@/lib/types/rate";
 
 export type ListRatesParams = {
-  assetId?: string;
   fiatCurrency?: string;
   page?: number;
   pageSize?: number;
@@ -18,15 +17,15 @@ export function listRates(params: ListRatesParams = {}) {
 }
 
 export function getRate(id: string) {
-  return apiGet<RateSnapshot>(`/rates/${id}`);
+  return apiGet<FxRate>(`/rates/${id}`);
 }
 
 export function createRate(body: CreateRateBody) {
-  return apiPost<RateSnapshot>(`/rates`, body);
+  return apiPost<FxRate>(`/rates`, body);
 }
 
 export function updateRate(id: string, body: UpdateRateBody) {
-  return apiPatch<RateSnapshot>(`/rates/${id}`, body);
+  return apiPatch<FxRate>(`/rates/${id}`, body);
 }
 
 export function deleteRate(id: string) {

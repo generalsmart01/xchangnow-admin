@@ -14,7 +14,7 @@ import { format, parseISO } from "date-fns";
 import { EmptyState } from "@/components/shared/empty-state";
 import { LineChart as LineChartIcon } from "lucide-react";
 import { money } from "@/lib/format";
-import type { RateSnapshot } from "@/lib/types/rate";
+import type { FxRate } from "@/lib/types/rate";
 
 function compactNumber(value: number): string {
   return new Intl.NumberFormat("en-NG", {
@@ -27,7 +27,7 @@ export function RateHistoryChart({
   snapshots,
   fiatCurrency = "NGN",
 }: {
-  snapshots: RateSnapshot[];
+  snapshots: FxRate[];
   fiatCurrency?: string;
 }) {
   const data = useMemo(
@@ -47,7 +47,7 @@ export function RateHistoryChart({
       <EmptyState
         icon={LineChartIcon}
         title="No rate history"
-        description="Add a snapshot to start charting this asset."
+        description="Add an FX rate to start charting the buy/sell spread."
         className="py-12"
       />
     );

@@ -57,13 +57,22 @@ export type Transaction = {
   status: TransactionStatus;
   assetNetworkId: string;
   cryptoAmount: string;
+  /** USD value captured at trade time. */
+  usdAmount: string | null;
   /** SWAP destination (null otherwise). */
   toAssetNetworkId: string | null;
   toAmount: string | null;
+  toUsdAmount: string | null;
   toAddress: string | null;
   fiatAmount: string;
   fiatCurrency: string;
-  rate: string;
+  /** Rate snapshots captured at trade time (for dispute review). */
+  assetPriceUsd: string | null;
+  toAssetPriceUsd: string | null;
+  /** NGN per USD used for the fiat leg. Null for SWAP (no fiat leg). */
+  fxRate: string | null;
+  /** @deprecated replaced by fxRate/assetPriceUsd; kept optional for back-compat. */
+  rate?: string;
   walletAddressId: string | null;
   txHash: string | null;
   riskScore?: number;

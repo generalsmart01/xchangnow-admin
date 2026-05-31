@@ -1,13 +1,16 @@
-import type { EmbeddedAsset } from "./asset";
-
 /**
- * Rates are a time-series keyed by assetId; each POST appends a new snapshot.
- * (There is no `/rates/current` endpoint — "current" is derived FE-side as the
- * newest snapshot per asset.)
+ * FX rate — the platform is USD-pegged, so this is a single NGN-per-USD rate
+ * (one row at a time, manual). Per-asset USD prices live on the Asset itself
+ * (`Asset.priceUsd`), NOT here. The buy/sell spread on this FX rate is the
+ * platform fee.
+ *
+ *   buyRate  = NGN per USD when WE sell USD  (customer BUY transactions)
+ *   sellRate = NGN per USD when WE buy USD   (customer SELL transactions)
+ *
+ * Safety rail (backend-enforced): sellRate must be < buyRate.
  */
-export type RateSnapshot = {
+export type FxRate = {
   id: string;
-  assetId: string;
   fiatCurrency: string;
   buyRate: string;
   sellRate: string;
@@ -15,25 +18,26 @@ export type RateSnapshot = {
   isManualOverride: boolean;
   updatedById: string | null;
   fetchedAt: string;
-  asset?: EmbeddedAsset;
 };
 
+/** Back-compat alias — the FX rate is still a time-series snapshot. */
+export type RateSnapshot = FxRate;
+
 export type RatesListResponse = {
-  rates: RateSnapshot[];
+  rates: FxRate[];
   total: number;
   page: number;
   pageSize: number;
 };
 
 export type CreateRateBody = {
-  assetId: string;
   buyRate: string;
   sellRate: string;
   fiatCurrency?: string;
   source?: string;
 };
 
-/** Typo-fix only — asset & fiatCurrency immutable. */
+/** Typo-fix only — fiatCurrency immutable. */
 export type UpdateRateBody = {
   buyRate?: string;
   sellRate?: string;

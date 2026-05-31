@@ -16,8 +16,8 @@ export default function NewRatePage() {
         </Link>
       </Button>
       <PageHeader
-        title="Add rate snapshot"
-        description="Record a manual buy/sell rate for an asset."
+        title="Add FX rate"
+        description="Record a manual NGN-per-USD buy/sell rate."
       />
       <Card>
         <CardContent className="pt-6">

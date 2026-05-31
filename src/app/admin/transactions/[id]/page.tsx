@@ -107,20 +107,55 @@ export default function TransactionDetailPage() {
                     asset={assetSymbol(tx.assetNetwork)}
                   />
                 </DetailRow>
+                {tx.usdAmount ? (
+                  <DetailRow label="USD value">
+                    <CurrencyDisplay amount={tx.usdAmount} currency="USD" />
+                  </DetailRow>
+                ) : null}
                 {tx.type === "SWAP" && tx.toAssetNetwork ? (
-                  <DetailRow label="Swap to">
-                    <CryptoDisplay
-                      amount={tx.toAmount ?? ""}
-                      asset={assetSymbol(tx.toAssetNetwork)}
+                  <>
+                    <DetailRow label="Swap to">
+                      <CryptoDisplay
+                        amount={tx.toAmount ?? ""}
+                        asset={assetSymbol(tx.toAssetNetwork)}
+                      />
+                    </DetailRow>
+                    {tx.toUsdAmount ? (
+                      <DetailRow label="Swap to (USD)">
+                        <CurrencyDisplay amount={tx.toUsdAmount} currency="USD" />
+                      </DetailRow>
+                    ) : null}
+                  </>
+                ) : null}
+                {tx.type !== "SWAP" ? (
+                  <DetailRow label="Fiat amount">
+                    <CurrencyDisplay
+                      amount={tx.fiatAmount}
+                      currency={tx.fiatCurrency}
                     />
                   </DetailRow>
                 ) : null}
-                <DetailRow label="Fiat amount">
-                  <CurrencyDisplay amount={tx.fiatAmount} currency={tx.fiatCurrency} />
-                </DetailRow>
-                <DetailRow label="Rate">
-                  {money(tx.rate, tx.fiatCurrency)}
-                </DetailRow>
+                {tx.assetPriceUsd ? (
+                  <DetailRow label="Asset price (snapshot)">
+                    <span className="tabular-nums">
+                      {money(tx.assetPriceUsd, "USD")}
+                    </span>
+                  </DetailRow>
+                ) : null}
+                {tx.toAssetPriceUsd ? (
+                  <DetailRow label="To asset price (snapshot)">
+                    <span className="tabular-nums">
+                      {money(tx.toAssetPriceUsd, "USD")}
+                    </span>
+                  </DetailRow>
+                ) : null}
+                {tx.fxRate ? (
+                  <DetailRow label="FX rate (snapshot)">
+                    <span className="tabular-nums">
+                      {money(tx.fxRate, tx.fiatCurrency)} / USD
+                    </span>
+                  </DetailRow>
+                ) : null}
                 {tx.riskScore != null ? (
                   <DetailRow label="Risk score">{tx.riskScore}</DetailRow>
                 ) : null}

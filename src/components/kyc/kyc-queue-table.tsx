@@ -1,15 +1,94 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
-import { IdCard } from "lucide-react";
+import { CheckCircle2, Eye, IdCard, MoreHorizontal, XCircle } from "lucide-react";
+
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { RoleGate } from "@/components/layout/role-gate";
 import { KycStatusBadge } from "./kyc-status-badge";
+import { KycRejectDialog } from "./kyc-reject-dialog";
 import { DateTimeDisplay } from "@/components/shared/datetime-display";
+import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
+import { approveKyc } from "@/lib/api/kyc";
 import { fullName } from "@/lib/format";
 import { smartLabel } from "@/lib/labels";
-import type { KycSubmission } from "@/lib/types/kyc";
+import type { KycReviewResult, KycSubmission } from "@/lib/types/kyc";
+
+function RowActions({ submission }: { submission: KycSubmission }) {
+  const router = useRouter();
+  const [dialog, setDialog] = useState<"approve" | "reject" | null>(null);
+  const isPending = submission.kycStatus === "PENDING";
+
+  const approve = useMutationToast<KycReviewResult, void>(
+    () => approveKyc(submission.userId).then((r) => r.data),
+    {
+      successMessage: "KYC submission approved",
+      invalidate: [["kyc"], ["kyc", submission.userId], ["dashboard"]],
+      onSuccess: () => setDialog(null),
+    },
+  );
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+          <Button variant="ghost" size="icon" className="size-8">
+            <MoreHorizontal className="size-4" />
+            <span className="sr-only">Open actions</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenuItem
+            onSelect={() => router.push(`/admin/kyc/${submission.userId}`)}
+          >
+            <Eye className="size-4" /> View details
+          </DropdownMenuItem>
+          {isPending ? (
+            <RoleGate cap="kyc.review">
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => setDialog("approve")}>
+                <CheckCircle2 className="size-4" /> Approve
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={() => setDialog("reject")}
+              >
+                <XCircle className="size-4" /> Reject
+              </DropdownMenuItem>
+            </RoleGate>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <ConfirmDialog
+        open={dialog === "approve"}
+        onOpenChange={(o) => setDialog(o ? "approve" : null)}
+        title="Approve KYC submission"
+        description="Confirm the identity documents match the customer's profile."
+        confirmText="Approve"
+        loading={approve.isPending}
+        onConfirm={() => approve.mutate()}
+      />
+      <KycRejectDialog
+        userId={submission.userId}
+        open={dialog === "reject"}
+        onOpenChange={(o) => setDialog(o ? "reject" : null)}
+      />
+    </>
+  );
+}
 
 const columns: ColumnDef<KycSubmission>[] = [
   {
@@ -45,6 +124,15 @@ const columns: ColumnDef<KycSubmission>[] = [
         value={row.original.submittedAt}
         className="text-sm text-muted-foreground"
       />
+    ),
+  },
+  {
+    header: "",
+    id: "actions",
+    cell: ({ row }) => (
+      <div className="text-right">
+        <RowActions submission={row.original} />
+      </div>
     ),
   },
 ];

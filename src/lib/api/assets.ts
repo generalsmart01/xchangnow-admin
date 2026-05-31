@@ -3,6 +3,7 @@ import type {
   Asset,
   AssetsListResponse,
   CreateAssetBody,
+  SetAssetPriceUsdBody,
   UpdateAssetBody,
 } from "@/lib/types/asset";
 import type {
@@ -34,6 +35,11 @@ export function updateAsset(id: string, body: UpdateAssetBody) {
 
 export function setAssetEnabled(id: string, enabled: boolean) {
   return apiPatch<Asset>(`/admin/assets/${id}/enabled`, { enabled });
+}
+
+/** Set / override an asset's USD spot price. */
+export function setAssetPriceUsd(id: string, body: SetAssetPriceUsdBody) {
+  return apiPatch<Asset>(`/admin/assets/${id}/price-usd`, body);
 }
 
 export function deleteAsset(id: string) {

@@ -1,14 +1,81 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Banknote } from "lucide-react";
+import { ArrowRight, Banknote, Eye, MoreHorizontal } from "lucide-react";
+
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { RoleGate } from "@/components/layout/role-gate";
 import { PayoutStatusBadge } from "./payout-status-badge";
+import {
+  PAYOUT_TRANSITIONS,
+  UpdateStatusDialog,
+} from "./update-status-dialog";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { DateTimeDisplay } from "@/components/shared/datetime-display";
-import type { Payout } from "@/lib/types/payout";
+import { titleCase } from "@/lib/labels";
+import type { Payout, PayoutStatus } from "@/lib/types/payout";
+
+function RowActions({ payout }: { payout: Payout }) {
+  const router = useRouter();
+  const [target, setTarget] = useState<PayoutStatus | null>(null);
+  const transitions = PAYOUT_TRANSITIONS[payout.status];
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+          <Button variant="ghost" size="icon" className="size-8">
+            <MoreHorizontal className="size-4" />
+            <span className="sr-only">Open actions</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenuItem
+            onSelect={() => router.push(`/admin/payouts/${payout.id}`)}
+          >
+            <Eye className="size-4" /> View details
+          </DropdownMenuItem>
+          {transitions.length > 0 ? (
+            <RoleGate cap="payouts.updateStatus">
+              <DropdownMenuSeparator />
+              {transitions.map((t) => (
+                <DropdownMenuItem
+                  key={t}
+                  variant={t === "FAILED" ? "destructive" : undefined}
+                  onSelect={() => setTarget(t)}
+                >
+                  <ArrowRight className="size-4" /> Mark {titleCase(t)}
+                </DropdownMenuItem>
+              ))}
+            </RoleGate>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {target ? (
+        <UpdateStatusDialog
+          payout={payout}
+          target={target}
+          open
+          onOpenChange={(o) => {
+            if (!o) setTarget(null);
+          }}
+        />
+      ) : null}
+    </>
+  );
+}
 
 const columns: ColumnDef<Payout>[] = [
   {
@@ -61,6 +128,15 @@ const columns: ColumnDef<Payout>[] = [
       ) : (
         <span className="text-sm text-muted-foreground">—</span>
       ),
+  },
+  {
+    header: "",
+    id: "actions",
+    cell: ({ row }) => (
+      <div className="text-right">
+        <RowActions payout={row.original} />
+      </div>
+    ),
   },
 ];
 

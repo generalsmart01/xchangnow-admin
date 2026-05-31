@@ -24,6 +24,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Breadcrumbs } from "./breadcrumbs";
 import { ThemeToggle } from "./theme-toggle";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { SidebarBrand, SidebarNav } from "./admin-sidebar";
 import { RoleBadge } from "@/components/staff/role-badge";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -68,6 +69,7 @@ export function AdminTopbar() {
       <Breadcrumbs />
 
       <div className="ml-auto flex items-center gap-2">
+        <NotificationBell />
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
