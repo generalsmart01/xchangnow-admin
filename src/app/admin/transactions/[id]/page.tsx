@@ -25,6 +25,7 @@ import { RoleGate } from "@/components/layout/role-gate";
 import { getTransaction } from "@/lib/api/transactions";
 import { ApiError } from "@/lib/api/client";
 import { fullName, money, truncateMiddle } from "@/lib/format";
+import { assetSymbol, pairLabel } from "@/lib/asset-display";
 
 type DialogKind = "approve" | "reject" | "complete" | null;
 
@@ -99,19 +100,30 @@ export default function TransactionDetailPage() {
                 <DetailRow label="Status">
                   <TransactionStatusBadge status={tx.status} />
                 </DetailRow>
-                <DetailRow label="Asset">
-                  {tx.cryptoAsset} · {tx.network}
-                </DetailRow>
+                <DetailRow label="Asset">{pairLabel(tx.assetNetwork)}</DetailRow>
                 <DetailRow label="Crypto amount">
-                  <CryptoDisplay amount={tx.cryptoAmount} asset={tx.cryptoAsset} />
+                  <CryptoDisplay
+                    amount={tx.cryptoAmount}
+                    asset={assetSymbol(tx.assetNetwork)}
+                  />
                 </DetailRow>
+                {tx.type === "SWAP" && tx.toAssetNetwork ? (
+                  <DetailRow label="Swap to">
+                    <CryptoDisplay
+                      amount={tx.toAmount ?? ""}
+                      asset={assetSymbol(tx.toAssetNetwork)}
+                    />
+                  </DetailRow>
+                ) : null}
                 <DetailRow label="Fiat amount">
                   <CurrencyDisplay amount={tx.fiatAmount} currency={tx.fiatCurrency} />
                 </DetailRow>
                 <DetailRow label="Rate">
                   {money(tx.rate, tx.fiatCurrency)}
                 </DetailRow>
-                <DetailRow label="Risk score">{tx.riskScore}</DetailRow>
+                {tx.riskScore != null ? (
+                  <DetailRow label="Risk score">{tx.riskScore}</DetailRow>
+                ) : null}
                 <DetailRow label="Created">
                   <DateTimeDisplay value={tx.createdAt} />
                 </DetailRow>
@@ -144,7 +156,10 @@ export default function TransactionDetailPage() {
               <CardTitle className="text-base">Proof of payment</CardTitle>
             </CardHeader>
             <CardContent>
-              <ProofViewer proofs={tx.proofs} network={tx.network} />
+              <ProofViewer
+                proofs={tx.proofs}
+                explorer={{ code: tx.assetNetwork?.network?.code }}
+              />
             </CardContent>
           </Card>
         </div>

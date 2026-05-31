@@ -1,4 +1,5 @@
-import type { TransactionType, TransactionStatus, CryptoAsset } from "./transaction";
+import type { TransactionType, TransactionStatus } from "./transaction";
+import type { EmbeddedAssetNetwork } from "./asset-network";
 
 export const PAYOUT_STATUSES = [
   "PENDING",
@@ -13,20 +14,20 @@ export type EmbeddedPayoutTransaction = {
   referenceCode: string;
   type: TransactionType;
   status: TransactionStatus;
-  cryptoAsset: CryptoAsset;
+  assetNetworkId: string;
   cryptoAmount: string;
   fiatAmount: string;
+  assetNetwork?: EmbeddedAssetNetwork;
 };
 
-export type MaskedBankAccount = {
-  id: string;
-  userId: string;
+/**
+ * Payout bank account — full account number IS returned (the admin needs it to
+ * make the transfer). Treat as sensitive PII.
+ */
+export type PayoutBankAccount = {
   bankName: string;
-  accountNumberMasked: string;
+  accountNumber: string;
   accountName: string;
-  isDefault: boolean;
-  createdAt: string;
-  updatedAt: string;
 };
 
 export type Payout = {
@@ -44,7 +45,7 @@ export type Payout = {
   createdAt: string;
   updatedAt: string;
   transaction?: EmbeddedPayoutTransaction;
-  bankAccount?: MaskedBankAccount;
+  bankAccount?: PayoutBankAccount;
 };
 
 export type PayoutsListResponse = {
@@ -54,8 +55,9 @@ export type PayoutsListResponse = {
   pageSize: number;
 };
 
+/** PROCESSING: {status}. PAID: {status, notes?}. FAILED: {status, failureReason}. */
 export type UpdatePayoutStatusBody = {
   status: PayoutStatus;
-  reference?: string;
+  notes?: string;
   failureReason?: string;
 };

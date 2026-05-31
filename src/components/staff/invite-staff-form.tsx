@@ -5,12 +5,11 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Copy, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -29,7 +28,6 @@ const schema = z.object({
   firstName: z.string().min(1, "Required"),
   lastName: z.string().min(1, "Required"),
   role: z.enum(["ADMIN", "OPS", "CUSTOMER_SERVICE"]),
-  phoneNumber: z.string().optional(),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -38,7 +36,6 @@ export function InviteStaffForm() {
   const toast = useToast();
   const queryClient = useQueryClient();
   const [submitting, setSubmitting] = useState(false);
-  const [devToken, setDevToken] = useState<string | null>(null);
 
   const {
     register,
@@ -61,53 +58,16 @@ export function InviteStaffForm() {
         firstName: values.firstName,
         lastName: values.lastName,
         role: values.role,
-        phoneNumber: values.phoneNumber?.trim() || undefined,
       }).then((r) => r.data);
 
-      toast.success(`Invite email sent to ${data.user.email}`);
+      toast.success(`Invite email sent to ${data.email}`);
       void queryClient.invalidateQueries({ queryKey: ["staff"] });
-
-      // Dev-only invite token (absent in production responses).
-      if (data.inviteToken) {
-        setDevToken(data.inviteToken);
-      } else {
-        router.push("/admin/staff");
-      }
+      router.push("/admin/staff");
     } catch (err) {
       toast.error(err, "Couldn't send invite");
     } finally {
       setSubmitting(false);
     }
-  }
-
-  if (devToken) {
-    return (
-      <div className="max-w-lg space-y-4">
-        <Alert>
-          <AlertTitle>Invite created</AlertTitle>
-          <AlertDescription className="space-y-3">
-            <p>Dev invite token (not shown in production):</p>
-            <div className="flex items-center gap-2">
-              <code className="min-w-0 flex-1 truncate rounded bg-muted px-2 py-1.5 font-mono text-xs">
-                {devToken}
-              </code>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  void navigator.clipboard.writeText(devToken);
-                  toast.success("Token copied");
-                }}
-              >
-                <Copy className="size-3.5" /> Copy
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-        <Button onClick={() => router.push("/admin/staff")}>Back to staff</Button>
-      </div>
-    );
   }
 
   return (
@@ -137,29 +97,23 @@ export function InviteStaffForm() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label>Role</Label>
-          <Select
-            value={role}
-            onValueChange={(v) => setValue("role", v as FormValues["role"])}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ASSIGNABLE_STAFF_ROLES.map((r) => (
-                <SelectItem key={r} value={r}>
-                  {titleCase(r)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="phoneNumber">Phone (optional)</Label>
-          <Input id="phoneNumber" placeholder="08012345670" {...register("phoneNumber")} />
-        </div>
+      <div className="space-y-2">
+        <Label>Role</Label>
+        <Select
+          value={role}
+          onValueChange={(v) => setValue("role", v as FormValues["role"])}
+        >
+          <SelectTrigger className="sm:w-[240px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {ASSIGNABLE_STAFF_ROLES.map((r) => (
+              <SelectItem key={r} value={r}>
+                {titleCase(r)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex gap-2">

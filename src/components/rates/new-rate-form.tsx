@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,16 +10,9 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { AssetSelect } from "@/components/shared/entity-selects";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import { createRate } from "@/lib/api/rates";
-import { CRYPTO_ASSETS, type CryptoAsset } from "@/lib/types/transaction";
 import type { CreateRateBody, RateSnapshot } from "@/lib/types/rate";
 
 const decimalString = z
@@ -27,7 +21,6 @@ const decimalString = z
   .refine((v) => Number(v) > 0 && !Number.isNaN(Number(v)), "Enter a positive amount");
 
 const schema = z.object({
-  asset: z.enum(CRYPTO_ASSETS),
   buyRate: decimalString,
   sellRate: decimalString,
   source: z.string().optional(),
@@ -36,31 +29,34 @@ type FormValues = z.infer<typeof schema>;
 
 export function NewRateForm() {
   const router = useRouter();
+  const [assetId, setAssetId] = useState("");
+  const [assetError, setAssetError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { asset: "BTC", source: "manual" },
+    defaultValues: { source: "manual" },
   });
-
-  const asset = watch("asset");
 
   const mutation = useMutationToast<RateSnapshot, CreateRateBody>(
     (body) => createRate(body).then((r) => r.data),
     {
       successMessage: "Rate snapshot recorded",
-      invalidate: [["rates"], ["rates", "current"]],
+      invalidate: [["rates"]],
       onSuccess: () => router.push("/admin/rates"),
     },
   );
 
   function onSubmit(values: FormValues) {
+    if (!assetId) {
+      setAssetError("Select an asset");
+      return;
+    }
     mutation.mutate({
-      asset: values.asset,
+      assetId,
       buyRate: values.buyRate,
       sellRate: values.sellRate,
       fiatCurrency: "NGN",
@@ -72,21 +68,16 @@ export function NewRateForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg space-y-5">
       <div className="space-y-2">
         <Label>Asset</Label>
-        <Select
-          value={asset}
-          onValueChange={(v) => setValue("asset", v as CryptoAsset)}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {CRYPTO_ASSETS.map((a) => (
-              <SelectItem key={a} value={a}>
-                {a}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <AssetSelect
+          value={assetId}
+          onChange={(v) => {
+            setAssetId(v);
+            setAssetError(null);
+          }}
+        />
+        {assetError ? (
+          <p className="text-xs text-destructive">{assetError}</p>
+        ) : null}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

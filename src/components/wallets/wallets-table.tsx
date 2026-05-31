@@ -19,6 +19,7 @@ import { RoleGate } from "@/components/layout/role-gate";
 import { useConfirm } from "@/lib/hooks/use-confirm";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import { deactivateWallet } from "@/lib/api/wallets";
+import { assetSymbol, networkName } from "@/lib/asset-display";
 import type { Wallet } from "@/lib/types/wallet";
 
 function RowActions({ wallet }: { wallet: Wallet }) {
@@ -69,10 +70,13 @@ const columns: ColumnDef<Wallet>[] = [
   {
     header: "Asset",
     cell: ({ row }) => (
-      <span className="font-medium">{row.original.cryptoAsset}</span>
+      <span className="font-medium">{assetSymbol(row.original.assetNetwork)}</span>
     ),
   },
-  { header: "Network", accessorKey: "network" },
+  {
+    header: "Network",
+    cell: ({ row }) => networkName(row.original.assetNetwork),
+  },
   {
     header: "Address",
     cell: ({ row }) => <WalletAddressDisplay address={row.original.address} />,

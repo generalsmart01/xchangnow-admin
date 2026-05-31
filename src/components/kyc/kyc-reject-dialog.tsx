@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import { rejectKyc } from "@/lib/api/kyc";
-import type { KycDetail, KycRejectBody } from "@/lib/types/kyc";
+import type { KycReviewResult, KycRejectBody } from "@/lib/types/kyc";
 
 export function KycRejectDialog({
   userId,
@@ -19,7 +19,7 @@ export function KycRejectDialog({
 }) {
   const [reason, setReason] = useState("");
 
-  const mutation = useMutationToast<KycDetail, KycRejectBody>(
+  const mutation = useMutationToast<KycReviewResult, KycRejectBody>(
     (body) => rejectKyc(userId, body).then((r) => r.data),
     {
       successMessage: "KYC submission rejected",

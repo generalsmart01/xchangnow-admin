@@ -136,7 +136,7 @@ export default function UserDetailPage() {
                   </span>
                 </DetailRow>
                 <DetailRow label="Phone">
-                  <span className="font-mono">{user.phoneNumberMasked}</span>
+                  <span className="font-mono">{user.phoneNumber ?? "—"}</span>
                 </DetailRow>
                 <DetailRow label="Role">
                   <RoleBadge role={user.role} />

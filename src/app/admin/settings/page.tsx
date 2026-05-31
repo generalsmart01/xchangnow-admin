@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { RoleBadge } from "@/components/staff/role-badge";
+import { ChangePasswordForm } from "@/components/settings/change-password-form";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import { updateMe } from "@/lib/api/users";
@@ -118,6 +119,19 @@ export default function SettingsPage() {
               Save changes
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card className="max-w-2xl">
+        <CardHeader>
+          <CardTitle className="text-base">Password</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Changing your password signs you out of all other devices. You stay
+            signed in here.
+          </p>
+          <ChangePasswordForm />
         </CardContent>
       </Card>
     </div>

@@ -1,10 +1,11 @@
 import { apiGet, apiPatch, apiPost, qs } from "./client";
-import type { AdminUser, Role, UserStatus } from "@/lib/types/user";
+import type { Role, UserStatus } from "@/lib/types/user";
 import type {
   ChangeRoleBody,
   InviteStaffBody,
   InviteStaffResponse,
   StaffListResponse,
+  StaffMember,
 } from "@/lib/types/staff";
 
 export type ListStaffParams = {
@@ -19,7 +20,7 @@ export function listStaff(params: ListStaffParams) {
 }
 
 export function getStaff(id: string) {
-  return apiGet<AdminUser>(`/admin/staff/${id}`);
+  return apiGet<StaffMember>(`/admin/staff/${id}`);
 }
 
 export function inviteStaff(body: InviteStaffBody) {
@@ -27,5 +28,5 @@ export function inviteStaff(body: InviteStaffBody) {
 }
 
 export function changeStaffRole(id: string, body: ChangeRoleBody) {
-  return apiPatch<AdminUser>(`/admin/staff/${id}/role`, body);
+  return apiPatch<StaffMember>(`/admin/staff/${id}/role`, body);
 }

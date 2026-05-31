@@ -31,7 +31,7 @@ export function UpdateStatusDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [reference, setReference] = useState("");
+  const [notes, setNotes] = useState("");
   const [failureReason, setFailureReason] = useState("");
 
   const mutation = useMutationToast<Payout, UpdatePayoutStatusBody>(
@@ -49,7 +49,7 @@ export function UpdateStatusDialog({
         ["dashboard"],
       ],
       onSuccess: () => {
-        setReference("");
+        setNotes("");
         setFailureReason("");
         onOpenChange(false);
       },
@@ -60,7 +60,7 @@ export function UpdateStatusDialog({
 
   function submit() {
     const body: UpdatePayoutStatusBody = { status: target };
-    if (target === "PROCESSING" && reference.trim()) body.reference = reference.trim();
+    if (target === "PAID" && notes.trim()) body.notes = notes.trim();
     if (target === "FAILED") body.failureReason = failureReason.trim();
     mutation.mutate(body);
   }
@@ -93,15 +93,14 @@ export function UpdateStatusDialog({
           </Alert>
         ) : null}
 
-        {target === "PROCESSING" ? (
+        {target === "PAID" ? (
           <div className="space-y-2">
-            <Label htmlFor="bank-ref">Bank reference (optional)</Label>
+            <Label htmlFor="paid-notes">Notes (optional)</Label>
             <Input
-              id="bank-ref"
-              value={reference}
-              onChange={(e) => setReference(e.target.value)}
-              placeholder="BANK-TXN-9988"
-              className="font-mono"
+              id="paid-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Sent via GTBank corporate at 14:32"
             />
           </div>
         ) : null}

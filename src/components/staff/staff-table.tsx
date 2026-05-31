@@ -9,9 +9,9 @@ import { RoleBadge } from "./role-badge";
 import { UserStatusBadge } from "@/components/users/user-status-badge";
 import { DateTimeDisplay } from "@/components/shared/datetime-display";
 import { fullName } from "@/lib/format";
-import type { AdminUser } from "@/lib/types/user";
+import type { StaffMember } from "@/lib/types/staff";
 
-const columns: ColumnDef<AdminUser>[] = [
+const columns: ColumnDef<StaffMember>[] = [
   {
     header: "Staff",
     cell: ({ row }) => (
@@ -30,14 +30,6 @@ const columns: ColumnDef<AdminUser>[] = [
     cell: ({ row }) => <UserStatusBadge status={row.original.status} />,
   },
   {
-    header: "Phone",
-    cell: ({ row }) => (
-      <span className="font-mono text-xs text-muted-foreground">
-        {row.original.phoneNumberMasked}
-      </span>
-    ),
-  },
-  {
     header: "Last login",
     cell: ({ row }) => (
       <DateTimeDisplay
@@ -52,7 +44,7 @@ export function StaffTable({
   staff,
   loading,
 }: {
-  staff: AdminUser[];
+  staff: StaffMember[];
   loading?: boolean;
 }) {
   const router = useRouter();

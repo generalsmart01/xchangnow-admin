@@ -5,6 +5,7 @@ const MAP: Record<UserStatus, { tone: Tone; label: string }> = {
   ACTIVE: { tone: "success", label: "Active" },
   SUSPENDED: { tone: "danger", label: "Suspended" },
   PENDING_VERIFICATION: { tone: "warning", label: "Pending verification" },
+  DEACTIVATED: { tone: "muted", label: "Deactivated" },
   ANONYMIZED: { tone: "muted", label: "Anonymized" },
 };
 

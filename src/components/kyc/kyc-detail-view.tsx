@@ -13,8 +13,9 @@ import { KycStatusBadge } from "./kyc-status-badge";
 import { KycApproveButton } from "./kyc-approve-button";
 import { KycRejectDialog } from "./kyc-reject-dialog";
 import { RoleGate } from "@/components/layout/role-gate";
-import { fullName } from "@/lib/format";
-import type { KycDetail } from "@/lib/types/kyc";
+import { fullName, shortDate } from "@/lib/format";
+import { smartLabel } from "@/lib/labels";
+import type { KycSubmission } from "@/lib/types/kyc";
 
 /** Sensitive value, masked until the admin explicitly reveals it. */
 function SensitiveField({ label, value }: { label: string; value: string }) {
@@ -42,9 +43,25 @@ function SensitiveField({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function KycDetailView({ kyc }: { kyc: KycDetail }) {
+function DocImage({ label, url }: { label: string; url: string | null }) {
+  if (!url) {
+    return <p className="text-sm text-muted-foreground">No {label.toLowerCase()} submitted.</p>;
+  }
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="block">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt={label}
+        className="aspect-square w-full rounded-md border object-cover"
+      />
+    </a>
+  );
+}
+
+export function KycDetailView({ kyc }: { kyc: KycSubmission }) {
   const [rejectOpen, setRejectOpen] = useState(false);
-  const isPending = kyc.status === "PENDING";
+  const isPending = kyc.kycStatus === "PENDING";
 
   return (
     <div className="space-y-6">
@@ -52,8 +69,8 @@ export function KycDetailView({ kyc }: { kyc: KycDetail }) {
         <ShieldAlert className="size-4" />
         <AlertTitle>Sensitive PII — your view is logged</AlertTitle>
         <AlertDescription>
-          This page displays decrypted identity data. Do not screenshot or share
-          it. Every access is recorded to the audit trail.
+          This page displays identity data. Do not screenshot or share it. Every
+          access is recorded to the audit trail.
         </AlertDescription>
       </Alert>
 
@@ -65,10 +82,14 @@ export function KycDetailView({ kyc }: { kyc: KycDetail }) {
             </CardHeader>
             <CardContent>
               <DetailList>
-                <DetailRow label="Name">{fullName(kyc)}</DetailRow>
-                <DetailRow label="Email">{kyc.email}</DetailRow>
+                <DetailRow label="Name">{fullName(kyc.user)}</DetailRow>
+                <DetailRow label="Email">{kyc.user.email}</DetailRow>
+                <DetailRow label="Date of birth">{shortDate(kyc.dateOfBirth)}</DetailRow>
+                <DetailRow label="Document type">
+                  {smartLabel(kyc.documentType)}
+                </DetailRow>
                 <DetailRow label="Status">
-                  <KycStatusBadge status={kyc.status} />
+                  <KycStatusBadge status={kyc.kycStatus} />
                 </DetailRow>
                 <DetailRow label="Submitted">
                   <DateTimeDisplay value={kyc.submittedAt} />
@@ -79,11 +100,11 @@ export function KycDetailView({ kyc }: { kyc: KycDetail }) {
                   </DetailRow>
                 ) : null}
               </DetailList>
-              {kyc.rejectionReason ? (
+              {kyc.rejectedReason ? (
                 <Alert variant="destructive" className="mt-4">
                   <XCircle className="size-4" />
                   <AlertTitle>Previously rejected</AlertTitle>
-                  <AlertDescription>{kyc.rejectionReason}</AlertDescription>
+                  <AlertDescription>{kyc.rejectedReason}</AlertDescription>
                 </Alert>
               ) : null}
             </CardContent>
@@ -91,19 +112,11 @@ export function KycDetailView({ kyc }: { kyc: KycDetail }) {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Identity documents</CardTitle>
+              <CardTitle className="text-base">Identity document</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {kyc.bvn ? (
-                <SensitiveField label="BVN" value={kyc.bvn} />
-              ) : (
-                <p className="text-sm text-muted-foreground">No BVN on file.</p>
-              )}
-              {kyc.nin ? (
-                <SensitiveField label="NIN" value={kyc.nin} />
-              ) : (
-                <p className="text-sm text-muted-foreground">No NIN on file.</p>
-              )}
+              <SensitiveField label="Document number" value={kyc.documentNumber} />
+              <DocImage label="Document image" url={kyc.documentImageUrl} />
             </CardContent>
           </Card>
         </div>
@@ -114,23 +127,7 @@ export function KycDetailView({ kyc }: { kyc: KycDetail }) {
               <CardTitle className="text-base">Selfie</CardTitle>
             </CardHeader>
             <CardContent>
-              {kyc.selfieUrl ? (
-                <a
-                  href={kyc.selfieUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={kyc.selfieUrl}
-                    alt="Applicant selfie"
-                    className="aspect-square w-full rounded-md border object-cover"
-                  />
-                </a>
-              ) : (
-                <p className="text-sm text-muted-foreground">No selfie submitted.</p>
-              )}
+              <DocImage label="Selfie" url={kyc.selfieImageUrl} />
             </CardContent>
           </Card>
 

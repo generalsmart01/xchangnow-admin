@@ -18,6 +18,10 @@ export type Capability =
   | "rates.manage"
   | "wallets.view"
   | "wallets.manage"
+  | "assets.view"
+  | "assets.manage"
+  | "networks.view"
+  | "networks.manage"
   | "kyc.view"
   | "kyc.review"
   | "staff.list"
@@ -40,6 +44,10 @@ const CAPABILITY_ROLES: Record<Capability, Role[]> = {
   "rates.manage": ["SUPER_ADMIN", "ADMIN", "OPS"],
   "wallets.view": ["SUPER_ADMIN", "ADMIN", "OPS"],
   "wallets.manage": ["SUPER_ADMIN", "ADMIN", "OPS"],
+  "assets.view": ["SUPER_ADMIN", "ADMIN"],
+  "assets.manage": ["SUPER_ADMIN", "ADMIN"],
+  "networks.view": ["SUPER_ADMIN", "ADMIN"],
+  "networks.manage": ["SUPER_ADMIN", "ADMIN"],
   "kyc.view": ["SUPER_ADMIN", "ADMIN", "OPS"],
   "kyc.review": ["SUPER_ADMIN", "ADMIN", "OPS"],
   "staff.list": ["SUPER_ADMIN", "ADMIN"],
@@ -70,6 +78,8 @@ export const SECTION_CAPABILITY: { prefix: string; cap: Capability }[] = [
   { prefix: "/admin/kyc", cap: "kyc.view" },
   { prefix: "/admin/rates", cap: "rates.view" },
   { prefix: "/admin/wallets", cap: "wallets.view" },
+  { prefix: "/admin/assets", cap: "assets.view" },
+  { prefix: "/admin/networks", cap: "networks.view" },
   { prefix: "/admin/staff", cap: "staff.list" },
 ];
 

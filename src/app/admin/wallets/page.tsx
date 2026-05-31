@@ -8,24 +8,25 @@ import { Button } from "@/components/ui/button";
 import { FilterBar, SelectFilter } from "@/components/shared/filter-bar";
 import { WalletsTable } from "@/components/wallets/wallets-table";
 import { RoleGate } from "@/components/layout/role-gate";
+import {
+  useAssetsCatalogue,
+  useNetworksCatalogue,
+} from "@/components/shared/entity-selects";
 import { usePaginatedQuery } from "@/lib/hooks/use-paginated-query";
 import { listWallets } from "@/lib/api/wallets";
-import {
-  CRYPTO_ASSETS,
-  NETWORKS,
-  type CryptoAsset,
-  type Network,
-} from "@/lib/types/transaction";
 
 export default function WalletsPage() {
+  const { data: assets = [] } = useAssetsCatalogue();
+  const { data: networks = [] } = useNetworksCatalogue();
+
   // No pagination on this endpoint, but reuse URL-filter state for asset/network/active.
   const q = usePaginatedQuery({
     queryKey: "wallets",
-    filterKeys: ["asset", "network", "isActive"],
+    filterKeys: ["assetId", "networkId", "isActive"],
     fetcher: (p) =>
       listWallets({
-        asset: p.asset as CryptoAsset | "",
-        network: p.network as Network | "",
+        assetId: (p.assetId as string) || undefined,
+        networkId: (p.networkId as string) || undefined,
         isActive: p.isActive === "" ? "" : p.isActive === "true",
       }),
   });
@@ -48,19 +49,19 @@ export default function WalletsPage() {
 
       <FilterBar>
         <SelectFilter
-          value={q.params.asset as string}
-          onChange={(v) => q.setFilter("asset", v)}
+          value={q.params.assetId as string}
+          onChange={(v) => q.setFilter("assetId", v)}
           allLabel="All assets"
           placeholder="Asset"
-          className="w-[140px]"
-          options={CRYPTO_ASSETS.map((a) => ({ value: a, label: a }))}
+          className="w-[150px]"
+          options={assets.map((a) => ({ value: a.id, label: a.symbol }))}
         />
         <SelectFilter
-          value={q.params.network as string}
-          onChange={(v) => q.setFilter("network", v)}
+          value={q.params.networkId as string}
+          onChange={(v) => q.setFilter("networkId", v)}
           allLabel="All networks"
           placeholder="Network"
-          options={NETWORKS.map((n) => ({ value: n, label: n }))}
+          options={networks.map((n) => ({ value: n.id, label: n.name }))}
         />
         <SelectFilter
           value={q.params.isActive as string}

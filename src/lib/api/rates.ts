@@ -1,26 +1,34 @@
-import { apiGet, apiPost, qs } from "./client";
+import { apiDelete, apiGet, apiPatch, apiPost, qs } from "./client";
 import type {
   CreateRateBody,
-  CurrentRatesResponse,
   RateSnapshot,
   RatesListResponse,
+  UpdateRateBody,
 } from "@/lib/types/rate";
-import type { CryptoAsset } from "@/lib/types/transaction";
-
-export function getCurrentRates() {
-  return apiGet<CurrentRatesResponse>(`/rates/current`);
-}
 
 export type ListRatesParams = {
-  asset?: CryptoAsset | "";
+  assetId?: string;
+  fiatCurrency?: string;
   page?: number;
   pageSize?: number;
 };
 
-export function listRates(params: ListRatesParams) {
+export function listRates(params: ListRatesParams = {}) {
   return apiGet<RatesListResponse>(`/rates${qs(params)}`);
+}
+
+export function getRate(id: string) {
+  return apiGet<RateSnapshot>(`/rates/${id}`);
 }
 
 export function createRate(body: CreateRateBody) {
   return apiPost<RateSnapshot>(`/rates`, body);
+}
+
+export function updateRate(id: string, body: UpdateRateBody) {
+  return apiPatch<RateSnapshot>(`/rates/${id}`, body);
+}
+
+export function deleteRate(id: string) {
+  return apiDelete<null>(`/rates/${id}`);
 }

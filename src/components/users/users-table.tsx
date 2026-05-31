@@ -25,7 +25,7 @@ const columns: ColumnDef<AdminUser>[] = [
     header: "Phone",
     cell: ({ row }) => (
       <span className="font-mono text-xs text-muted-foreground">
-        {row.original.phoneNumberMasked}
+        {row.original.phoneNumber ?? "—"}
       </span>
     ),
   },

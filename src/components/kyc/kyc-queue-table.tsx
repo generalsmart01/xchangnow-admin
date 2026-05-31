@@ -2,43 +2,41 @@
 
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Check, IdCard, Minus } from "lucide-react";
+import { IdCard } from "lucide-react";
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { KycStatusBadge } from "./kyc-status-badge";
 import { DateTimeDisplay } from "@/components/shared/datetime-display";
 import { fullName } from "@/lib/format";
-import type { KycQueueItem } from "@/lib/types/kyc";
+import { smartLabel } from "@/lib/labels";
+import type { KycSubmission } from "@/lib/types/kyc";
 
-function YesNo({ value }: { value: boolean }) {
-  return value ? (
-    <Check className="size-4 text-success" />
-  ) : (
-    <Minus className="size-4 text-muted-foreground" />
-  );
-}
-
-const columns: ColumnDef<KycQueueItem>[] = [
+const columns: ColumnDef<KycSubmission>[] = [
   {
     header: "Applicant",
     cell: ({ row }) => (
       <div className="flex flex-col">
-        <span className="text-sm font-medium">{fullName(row.original)}</span>
-        <span className="text-xs text-muted-foreground">{row.original.email}</span>
+        <span className="text-sm font-medium">{fullName(row.original.user)}</span>
+        <span className="text-xs text-muted-foreground">
+          {row.original.user.email}
+        </span>
+      </div>
+    ),
+  },
+  {
+    header: "Document",
+    cell: ({ row }) => (
+      <div className="flex flex-col">
+        <span className="text-sm">{smartLabel(row.original.documentType)}</span>
+        <span className="font-mono text-xs text-muted-foreground">
+          {row.original.documentNumber}
+        </span>
       </div>
     ),
   },
   {
     header: "Status",
-    cell: ({ row }) => <KycStatusBadge status={row.original.status} />,
-  },
-  {
-    header: "BVN",
-    cell: ({ row }) => <YesNo value={row.original.hasBvn} />,
-  },
-  {
-    header: "NIN",
-    cell: ({ row }) => <YesNo value={row.original.hasNin} />,
+    cell: ({ row }) => <KycStatusBadge status={row.original.kycStatus} />,
   },
   {
     header: "Submitted",
@@ -55,7 +53,7 @@ export function KycQueueTable({
   submissions,
   loading,
 }: {
-  submissions: KycQueueItem[];
+  submissions: KycSubmission[];
   loading?: boolean;
 }) {
   const router = useRouter();

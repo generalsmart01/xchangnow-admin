@@ -1,7 +1,6 @@
 import { apiGet, apiPost, qs } from "./client";
 import type {
   ApproveBody,
-  CryptoAsset,
   MarkCompletedBody,
   RejectBody,
   Transaction,
@@ -15,7 +14,8 @@ export type ListTransactionsParams = {
   pageSize?: number;
   status?: TransactionStatus | "";
   type?: TransactionType | "";
-  asset?: CryptoAsset | "";
+  assetId?: string;
+  assetNetworkId?: string;
   userId?: string;
 };
 

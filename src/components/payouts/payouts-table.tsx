@@ -32,7 +32,7 @@ const columns: ColumnDef<Payout>[] = [
     header: "Account",
     cell: ({ row }) => (
       <span className="font-mono text-xs text-muted-foreground">
-        {row.original.bankAccount?.accountNumberMasked ?? "—"}
+        {row.original.bankAccount?.accountNumber ?? "—"}
       </span>
     ),
   },

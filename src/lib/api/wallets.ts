@@ -4,11 +4,11 @@ import type {
   UpdateWalletBody,
   Wallet,
 } from "@/lib/types/wallet";
-import type { CryptoAsset, Network } from "@/lib/types/transaction";
 
 export type ListWalletsParams = {
-  asset?: CryptoAsset | "";
-  network?: Network | "";
+  assetNetworkId?: string;
+  assetId?: string;
+  networkId?: string;
   isActive?: boolean | "";
 };
 

@@ -9,6 +9,7 @@ import { TransactionTypeBadge } from "./transaction-type-badge";
 import { CryptoDisplay, CurrencyDisplay } from "@/components/shared/currency-display";
 import { DateTimeDisplay } from "@/components/shared/datetime-display";
 import { truncateMiddle } from "@/lib/format";
+import { assetSymbol } from "@/lib/asset-display";
 import type { Transaction } from "@/lib/types/transaction";
 import { ArrowLeftRight } from "lucide-react";
 
@@ -49,7 +50,7 @@ const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => (
       <CryptoDisplay
         amount={row.original.cryptoAmount}
-        asset={row.original.cryptoAsset}
+        asset={assetSymbol(row.original.assetNetwork)}
         className="text-sm"
       />
     ),

@@ -3,14 +3,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DateTimeDisplay } from "@/components/shared/datetime-display";
 import { ToneBadge } from "@/components/shared/tone-badge";
 import { money } from "@/lib/format";
-import type { CurrentRate } from "@/lib/types/rate";
+import type { RateSnapshot } from "@/lib/types/rate";
 
+/**
+ * "Current" rates derived FE-side as the newest snapshot per asset (there is no
+ * dedicated /rates/current endpoint).
+ */
 export function CurrentRatesCard({
   rates,
   fiatCurrency = "NGN",
   loading,
 }: {
-  rates: CurrentRate[];
+  rates: RateSnapshot[];
   fiatCurrency?: string;
   loading?: boolean;
 }) {
@@ -30,13 +34,17 @@ export function CurrentRatesCard({
     );
   }
 
+  if (rates.length === 0) return null;
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {rates.map((rate) => (
-        <Card key={rate.asset}>
+        <Card key={rate.id}>
           <CardContent className="space-y-3 py-5">
             <div className="flex items-center justify-between">
-              <span className="text-lg font-semibold">{rate.asset}</span>
+              <span className="text-lg font-semibold">
+                {rate.asset?.symbol ?? rate.assetId}
+              </span>
               <ToneBadge tone="muted">{rate.source}</ToneBadge>
             </div>
             <div className="space-y-1.5">

@@ -33,9 +33,7 @@ const REFRESHABLE_MESSAGES = [
   "Unauthorized",
 ];
 
-async function parseEnvelope<T>(
-  res: Response,
-): Promise<AnyEnvelope<T>> {
+async function parseEnvelope<T>(res: Response): Promise<AnyEnvelope<T>> {
   try {
     return (await res.json()) as AnyEnvelope<T>;
   } catch {

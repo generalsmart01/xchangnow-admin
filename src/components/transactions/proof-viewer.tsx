@@ -4,16 +4,23 @@ import { ExternalLink, FileText, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/shared/copy-button";
 import { explorerName, explorerTxUrl } from "@/lib/explorer";
-import type { Network, TransactionProof } from "@/lib/types/transaction";
+import type { TransactionProof } from "@/lib/types/transaction";
+
+type ExplorerInfo = {
+  /** Network code, e.g. "ETHEREUM". */
+  code?: string | null;
+  /** Optional explorer URL template carrying a {txHash} placeholder. */
+  template?: string | null;
+};
 
 function CryptoHashProof({
   proof,
-  network,
+  explorer,
 }: {
   proof: TransactionProof;
-  network: Network;
+  explorer: ExplorerInfo;
 }) {
-  const url = explorerTxUrl(network, proof.url);
+  const url = explorerTxUrl({ code: explorer.code, template: explorer.template, hash: proof.url });
   return (
     <div className="space-y-2 rounded-lg border p-3">
       <div className="flex items-center gap-2 text-sm font-medium">
@@ -30,7 +37,7 @@ function CryptoHashProof({
         <Button variant="outline" size="sm" asChild>
           <a href={url} target="_blank" rel="noopener noreferrer">
             <ExternalLink className="size-3.5" />
-            View on {explorerName(network)}
+            View on {explorerName(explorer.code)}
           </a>
         </Button>
       ) : null}
@@ -65,10 +72,10 @@ function ReceiptProof({ proof }: { proof: TransactionProof }) {
 
 export function ProofViewer({
   proofs,
-  network,
+  explorer = {},
 }: {
   proofs: TransactionProof[] | undefined;
-  network: Network;
+  explorer?: ExplorerInfo;
 }) {
   if (!proofs || proofs.length === 0) {
     return (
@@ -82,7 +89,7 @@ export function ProofViewer({
     <div className="space-y-3">
       {proofs.map((proof) =>
         proof.type === "CRYPTO_TX_HASH" ? (
-          <CryptoHashProof key={proof.id} proof={proof} network={network} />
+          <CryptoHashProof key={proof.id} proof={proof} explorer={explorer} />
         ) : (
           <ReceiptProof key={proof.id} proof={proof} />
         ),

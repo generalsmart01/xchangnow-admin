@@ -2,70 +2,32 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { AssetNetworkSelect } from "@/components/shared/entity-selects";
 import { WalletAddressDisplay } from "./wallet-address-display";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import { createWallet, updateWallet } from "@/lib/api/wallets";
-import {
-  CRYPTO_ASSETS,
-  NETWORKS,
-  type CryptoAsset,
-  type Network,
-} from "@/lib/types/transaction";
+import { pairLabel } from "@/lib/asset-display";
 import type {
   CreateWalletBody,
   UpdateWalletBody,
   Wallet,
 } from "@/lib/types/wallet";
 
-const schema = z.object({
-  cryptoAsset: z.enum(CRYPTO_ASSETS),
-  network: z.enum(NETWORKS),
-  address: z.string().min(6, "Enter a valid address"),
-  label: z.string().optional(),
-  isActive: z.boolean(),
-});
-type FormValues = z.infer<typeof schema>;
-
 export function WalletForm({ wallet }: { wallet?: Wallet }) {
   const router = useRouter();
   const isEdit = !!wallet;
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      cryptoAsset: wallet?.cryptoAsset ?? "BTC",
-      network: wallet?.network ?? "BITCOIN",
-      address: wallet?.address ?? "",
-      label: wallet?.label ?? "",
-      isActive: wallet?.isActive ?? true,
-    },
-  });
-
+  const [assetNetworkId, setAssetNetworkId] = useState(wallet?.assetNetworkId ?? "");
+  const [address, setAddress] = useState(wallet?.address ?? "");
+  const [label, setLabel] = useState(wallet?.label ?? "");
   const [isActive, setIsActive] = useState(wallet?.isActive ?? true);
-  const cryptoAsset = watch("cryptoAsset");
-  const network = watch("network");
+  const [addressError, setAddressError] = useState<string | null>(null);
 
   const createMutation = useMutationToast<Wallet, CreateWalletBody>(
     (body) => createWallet(body).then((r) => r.data),
@@ -87,67 +49,34 @@ export function WalletForm({ wallet }: { wallet?: Wallet }) {
 
   const pending = createMutation.isPending || updateMutation.isPending;
 
-  function onSubmit(values: FormValues) {
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
     if (isEdit) {
-      updateMutation.mutate({ label: values.label?.trim() || undefined, isActive });
-    } else {
-      createMutation.mutate({
-        cryptoAsset: values.cryptoAsset,
-        network: values.network,
-        address: values.address.trim(),
-        label: values.label?.trim() || undefined,
-        isActive,
-      });
+      updateMutation.mutate({ label: label.trim() || undefined, isActive });
+      return;
     }
+    if (address.trim().length < 20 || address.trim().length > 120) {
+      setAddressError("Address must be 20–120 characters");
+      return;
+    }
+    if (!assetNetworkId) return;
+    createMutation.mutate({
+      assetNetworkId,
+      address: address.trim(),
+      label: label.trim() || undefined,
+      isActive,
+    });
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg space-y-5">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label>Asset</Label>
-          {isEdit ? (
-            <Input value={cryptoAsset} disabled />
-          ) : (
-            <Select
-              value={cryptoAsset}
-              onValueChange={(v) => setValue("cryptoAsset", v as CryptoAsset)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CRYPTO_ASSETS.map((a) => (
-                  <SelectItem key={a} value={a}>
-                    {a}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-        <div className="space-y-2">
-          <Label>Network</Label>
-          {isEdit ? (
-            <Input value={network} disabled />
-          ) : (
-            <Select
-              value={network}
-              onValueChange={(v) => setValue("network", v as Network)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {NETWORKS.map((n) => (
-                  <SelectItem key={n} value={n}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
+    <form onSubmit={onSubmit} className="max-w-lg space-y-5">
+      <div className="space-y-2">
+        <Label>Asset / network</Label>
+        {isEdit ? (
+          <Input value={pairLabel(wallet!.assetNetwork)} disabled />
+        ) : (
+          <AssetNetworkSelect value={assetNetworkId} onChange={setAssetNetworkId} />
+        )}
       </div>
 
       <div className="space-y-2">
@@ -162,10 +91,14 @@ export function WalletForm({ wallet }: { wallet?: Wallet }) {
               id="address"
               placeholder="bc1qxy…"
               className="font-mono"
-              {...register("address")}
+              value={address}
+              onChange={(e) => {
+                setAddress(e.target.value);
+                setAddressError(null);
+              }}
             />
-            {errors.address ? (
-              <p className="text-xs text-destructive">{errors.address.message}</p>
+            {addressError ? (
+              <p className="text-xs text-destructive">{addressError}</p>
             ) : null}
           </>
         )}
@@ -176,7 +109,8 @@ export function WalletForm({ wallet }: { wallet?: Wallet }) {
         <Input
           id="label"
           placeholder="Primary BTC hot wallet"
-          {...register("label")}
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
         />
       </div>
 
@@ -191,7 +125,7 @@ export function WalletForm({ wallet }: { wallet?: Wallet }) {
       </div>
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending || (!isEdit && !assetNetworkId)}>
           {pending ? <Loader2 className="size-4 animate-spin" /> : null}
           {isEdit ? "Save changes" : "Create wallet"}
         </Button>

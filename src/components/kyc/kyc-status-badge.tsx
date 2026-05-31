@@ -5,7 +5,7 @@ const MAP: Record<KycStatus, { tone: Tone; label: string }> = {
   PENDING: { tone: "warning", label: "Pending" },
   APPROVED: { tone: "success", label: "Approved" },
   REJECTED: { tone: "danger", label: "Rejected" },
-  NOT_SUBMITTED: { tone: "muted", label: "Not submitted" },
+  NONE: { tone: "muted", label: "Not submitted" },
 };
 
 export function KycStatusBadge({ status }: { status: KycStatus }) {

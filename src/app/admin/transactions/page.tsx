@@ -4,22 +4,23 @@ import { PageHeader } from "@/components/shared/page-header";
 import { FilterBar, SelectFilter } from "@/components/shared/filter-bar";
 import { Pagination } from "@/components/shared/pagination";
 import { TransactionsTable } from "@/components/transactions/transactions-table";
+import { useAssetsCatalogue } from "@/components/shared/entity-selects";
 import { usePaginatedQuery } from "@/lib/hooks/use-paginated-query";
 import { listTransactions } from "@/lib/api/transactions";
 import {
-  CRYPTO_ASSETS,
   TRANSACTION_STATUSES,
   TRANSACTION_TYPES,
-  type CryptoAsset,
   type TransactionStatus,
   type TransactionType,
 } from "@/lib/types/transaction";
 import { titleCase } from "@/lib/labels";
 
 export default function TransactionsPage() {
+  const { data: assets = [] } = useAssetsCatalogue();
+
   const q = usePaginatedQuery({
     queryKey: "transactions",
-    filterKeys: ["status", "type", "asset"],
+    filterKeys: ["status", "type", "assetId"],
     defaults: { status: "UNDER_REVIEW" },
     fetcher: (p) =>
       listTransactions({
@@ -27,7 +28,7 @@ export default function TransactionsPage() {
         pageSize: p.pageSize,
         status: p.status as TransactionStatus | "",
         type: p.type as TransactionType | "",
-        asset: p.asset as CryptoAsset | "",
+        assetId: p.assetId as string,
       }),
   });
 
@@ -60,12 +61,12 @@ export default function TransactionsPage() {
           options={TRANSACTION_TYPES.map((t) => ({ value: t, label: titleCase(t) }))}
         />
         <SelectFilter
-          value={q.params.asset as string}
-          onChange={(v) => q.setFilter("asset", v)}
+          value={q.params.assetId as string}
+          onChange={(v) => q.setFilter("assetId", v)}
           allLabel="All assets"
           placeholder="Asset"
-          className="w-[140px]"
-          options={CRYPTO_ASSETS.map((a) => ({ value: a, label: a }))}
+          className="w-[160px]"
+          options={assets.map((a) => ({ value: a.id, label: a.symbol }))}
         />
       </FilterBar>
 

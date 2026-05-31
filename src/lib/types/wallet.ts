@@ -1,19 +1,19 @@
-import type { CryptoAsset, Network } from "./transaction";
+import type { EmbeddedAssetNetwork } from "./asset-network";
 
+/** Company-owned crypto wallet, now keyed by an asset-network pair. */
 export type Wallet = {
   id: string;
-  cryptoAsset: CryptoAsset;
-  network: Network;
+  assetNetworkId: string;
   address: string;
   label: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  assetNetwork?: EmbeddedAssetNetwork;
 };
 
 export type CreateWalletBody = {
-  cryptoAsset: CryptoAsset;
-  network: Network;
+  assetNetworkId: string;
   address: string;
   label?: string;
   isActive?: boolean;

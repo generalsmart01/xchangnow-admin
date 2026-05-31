@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import { approveKyc } from "@/lib/api/kyc";
-import type { KycDetail } from "@/lib/types/kyc";
+import type { KycReviewResult } from "@/lib/types/kyc";
 
 export function KycApproveButton({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false);
 
-  const mutation = useMutationToast<KycDetail, void>(
+  const mutation = useMutationToast<KycReviewResult, void>(
     () => approveKyc(userId).then((r) => r.data),
     {
       successMessage: "KYC submission approved",

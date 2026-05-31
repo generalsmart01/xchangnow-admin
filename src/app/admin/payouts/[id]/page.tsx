@@ -125,14 +125,21 @@ export default function PayoutDetailPage() {
                   {payout.bankAccount?.bankName ?? "—"}
                 </DetailRow>
                 <DetailRow label="Account number">
-                  <span className="font-mono">
-                    {payout.bankAccount?.accountNumberMasked ?? "—"}
+                  <span className="flex items-center gap-1">
+                    <span className="font-mono">
+                      {payout.bankAccount?.accountNumber ?? "—"}
+                    </span>
+                    {payout.bankAccount?.accountNumber ? (
+                      <CopyButton
+                        value={payout.bankAccount.accountNumber}
+                        label="Account number"
+                      />
+                    ) : null}
                   </span>
                 </DetailRow>
               </DetailList>
               <p className="mt-3 text-xs text-muted-foreground">
-                Account numbers are masked. The full number for the bank transfer
-                is obtained out-of-band for v1.
+                Sensitive payout details — use only to complete the bank transfer.
               </p>
             </CardContent>
           </Card>

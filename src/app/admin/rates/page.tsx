@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -23,31 +23,56 @@ import { RateHistoryChart } from "@/components/rates/rate-history-chart";
 import { ToneBadge } from "@/components/shared/tone-badge";
 import { DateTimeDisplay } from "@/components/shared/datetime-display";
 import { RoleGate } from "@/components/layout/role-gate";
-import { getCurrentRates, listRates } from "@/lib/api/rates";
-import { CRYPTO_ASSETS, type CryptoAsset } from "@/lib/types/transaction";
+import { useAssetsCatalogue } from "@/components/shared/entity-selects";
+import { listRates } from "@/lib/api/rates";
+import type { RateSnapshot } from "@/lib/types/rate";
 import { money } from "@/lib/format";
 
-export default function RatesPage() {
-  const [asset, setAsset] = useState<CryptoAsset>("BTC");
+/** Newest snapshot per asset, from a flat newest-first list. */
+function deriveCurrent(rates: RateSnapshot[]): RateSnapshot[] {
+  const seen = new Set<string>();
+  const out: RateSnapshot[] = [];
+  for (const r of rates) {
+    if (seen.has(r.assetId)) continue;
+    seen.add(r.assetId);
+    out.push(r);
+  }
+  return out;
+}
 
-  const current = useQuery({
-    queryKey: ["rates", "current"],
-    queryFn: () => getCurrentRates().then((r) => r.data),
+export default function RatesPage() {
+  const { data: assets = [] } = useAssetsCatalogue();
+  const [assetId, setAssetId] = useState<string>("");
+
+  // Default the history selector to the first asset once the catalogue loads.
+  const selectedAssetId = assetId || assets[0]?.id || "";
+
+  const recent = useQuery({
+    queryKey: ["rates", { pageSize: 100 }],
+    queryFn: () => listRates({ pageSize: 100 }).then((r) => r.data),
   });
 
   const history = useQuery({
-    queryKey: ["rates", { asset, pageSize: 50 }],
-    queryFn: () => listRates({ asset, pageSize: 50 }).then((r) => r.data),
+    queryKey: ["rates", { assetId: selectedAssetId, pageSize: 50 }],
+    queryFn: () =>
+      listRates({ assetId: selectedAssetId, pageSize: 50 }).then((r) => r.data),
+    enabled: !!selectedAssetId,
   });
 
-  const fiat = current.data?.fiatCurrency ?? "NGN";
+  const current = useMemo(
+    () => deriveCurrent(recent.data?.rates ?? []),
+    [recent.data],
+  );
+  const fiat = current[0]?.fiatCurrency ?? "NGN";
   const snapshots = history.data?.rates ?? [];
+  const selectedSymbol =
+    assets.find((a) => a.id === selectedAssetId)?.symbol ?? "asset";
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Rates"
-        description="Live buy/sell rates and snapshot history per asset."
+        description="Latest buy/sell rates and snapshot history per asset."
         actions={
           <RoleGate cap="rates.manage">
             <Button asChild>
@@ -59,22 +84,18 @@ export default function RatesPage() {
         }
       />
 
-      <CurrentRatesCard
-        rates={current.data?.rates ?? []}
-        fiatCurrency={fiat}
-        loading={current.isLoading}
-      />
+      <CurrentRatesCard rates={current} fiatCurrency={fiat} loading={recent.isLoading} />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Rate history</CardTitle>
           <SelectFilter
-            value={asset}
-            onChange={(v) => setAsset((v || "BTC") as CryptoAsset)}
-            allLabel="BTC"
+            value={selectedAssetId}
+            onChange={(v) => setAssetId(v)}
+            allLabel="Select asset"
             placeholder="Asset"
-            className="w-[120px]"
-            options={CRYPTO_ASSETS.map((a) => ({ value: a, label: a }))}
+            className="w-[150px]"
+            options={assets.map((a) => ({ value: a.id, label: a.symbol }))}
           />
         </CardHeader>
         <CardContent>
@@ -88,7 +109,9 @@ export default function RatesPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Recent snapshots — {asset}</CardTitle>
+          <CardTitle className="text-base">
+            Recent snapshots — {selectedSymbol}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-hidden rounded-lg border">

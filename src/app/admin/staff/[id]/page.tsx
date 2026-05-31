@@ -78,9 +78,6 @@ export default function StaffDetailPage() {
             <CardContent>
               <DetailList>
                 <DetailRow label="Email">{staff.email}</DetailRow>
-                <DetailRow label="Phone">
-                  <span className="font-mono">{staff.phoneNumberMasked}</span>
-                </DetailRow>
                 <DetailRow label="Role">
                   <RoleBadge role={staff.role} />
                 </DetailRow>

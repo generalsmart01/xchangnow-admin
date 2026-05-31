@@ -206,13 +206,13 @@ export default function DashboardPage() {
                 className="flex items-center justify-between gap-3 text-sm"
               >
                 <span className="flex min-w-0 flex-col">
-                  <span className="truncate font-medium">{fullName(k)}</span>
+                  <span className="truncate font-medium">{fullName(k.user)}</span>
                   <span className="truncate text-xs text-muted-foreground">
-                    {k.email}
+                    {k.user.email}
                   </span>
                 </span>
                 <span className="flex items-center gap-2">
-                  <KycStatusBadge status={k.status} />
+                  <KycStatusBadge status={k.kycStatus} />
                   <DateTimeDisplay
                     value={k.submittedAt}
                     className="text-xs text-muted-foreground"

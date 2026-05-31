@@ -19,17 +19,26 @@ export const USER_STATUSES = [
   "ACTIVE",
   "SUSPENDED",
   "PENDING_VERIFICATION",
+  "DEACTIVATED",
   "ANONYMIZED",
 ] as const;
 export type UserStatus = (typeof USER_STATUSES)[number];
 
-/** Admin-facing user (phone always masked). */
+/** Statuses an admin may filter the users list by. */
+export const USER_FILTER_STATUSES: UserStatus[] = [
+  "ACTIVE",
+  "SUSPENDED",
+  "PENDING_VERIFICATION",
+  "DEACTIVATED",
+];
+
+/** Admin-facing user. Full phone number is returned. */
 export type AdminUser = {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  phoneNumberMasked: string;
+  phoneNumber: string | null;
   role: Role;
   status: UserStatus;
   isEmailVerified: boolean;
@@ -40,10 +49,8 @@ export type AdminUser = {
   deletedAt: string | null;
 };
 
-/** The authenticated admin's own profile (full phone, not masked). */
-export type SelfUser = Omit<AdminUser, "phoneNumberMasked"> & {
-  phoneNumber: string;
-};
+/** The authenticated admin's own profile — same shape. */
+export type SelfUser = AdminUser;
 
 export type UsersListResponse = {
   users: AdminUser[];

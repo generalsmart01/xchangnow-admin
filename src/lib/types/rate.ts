@@ -1,21 +1,13 @@
-import type { CryptoAsset } from "./transaction";
+import type { EmbeddedAsset } from "./asset";
 
-export type CurrentRate = {
-  asset: CryptoAsset;
-  buyRate: string;
-  sellRate: string;
-  source: string;
-  fetchedAt: string;
-};
-
-export type CurrentRatesResponse = {
-  fiatCurrency: string;
-  rates: CurrentRate[];
-};
-
+/**
+ * Rates are a time-series keyed by assetId; each POST appends a new snapshot.
+ * (There is no `/rates/current` endpoint — "current" is derived FE-side as the
+ * newest snapshot per asset.)
+ */
 export type RateSnapshot = {
   id: string;
-  asset: CryptoAsset;
+  assetId: string;
   fiatCurrency: string;
   buyRate: string;
   sellRate: string;
@@ -23,6 +15,7 @@ export type RateSnapshot = {
   isManualOverride: boolean;
   updatedById: string | null;
   fetchedAt: string;
+  asset?: EmbeddedAsset;
 };
 
 export type RatesListResponse = {
@@ -33,9 +26,16 @@ export type RatesListResponse = {
 };
 
 export type CreateRateBody = {
-  asset: CryptoAsset;
+  assetId: string;
   buyRate: string;
   sellRate: string;
-  fiatCurrency: string;
+  fiatCurrency?: string;
+  source?: string;
+};
+
+/** Typo-fix only — asset & fiatCurrency immutable. */
+export type UpdateRateBody = {
+  buyRate?: string;
+  sellRate?: string;
   source?: string;
 };

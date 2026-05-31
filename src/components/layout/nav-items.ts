@@ -6,6 +6,8 @@ import {
   IdCard,
   LineChart,
   Wallet,
+  Coins,
+  Network,
   UserCog,
   Settings,
   type LucideIcon,
@@ -30,6 +32,8 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "KYC", href: "/admin/kyc", icon: IdCard, cap: "kyc.view" },
   { label: "Rates", href: "/admin/rates", icon: LineChart, cap: "rates.view" },
   { label: "Wallets", href: "/admin/wallets", icon: Wallet, cap: "wallets.view" },
+  { label: "Assets", href: "/admin/assets", icon: Coins, cap: "assets.view" },
+  { label: "Networks", href: "/admin/networks", icon: Network, cap: "networks.view" },
   { label: "Staff", href: "/admin/staff", icon: UserCog, cap: "staff.list" },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
