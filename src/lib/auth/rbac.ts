@@ -24,6 +24,7 @@ export type Capability =
   | "networks.manage"
   | "kyc.view"
   | "kyc.review"
+  | "chat.view"
   | "staff.list"
   | "staff.invite"
   | "staff.changeRole"
@@ -50,6 +51,7 @@ const CAPABILITY_ROLES: Record<Capability, Role[]> = {
   "networks.manage": ["SUPER_ADMIN", "ADMIN"],
   "kyc.view": ["SUPER_ADMIN", "ADMIN", "OPS"],
   "kyc.review": ["SUPER_ADMIN", "ADMIN", "OPS"],
+  "chat.view": ["SUPER_ADMIN", "ADMIN", "OPS"],
   "staff.list": ["SUPER_ADMIN", "ADMIN"],
   "staff.invite": ["SUPER_ADMIN"],
   "staff.changeRole": ["SUPER_ADMIN"],
@@ -76,6 +78,7 @@ export const SECTION_CAPABILITY: { prefix: string; cap: Capability }[] = [
   { prefix: "/admin/transactions", cap: "transactions.view" },
   { prefix: "/admin/payouts", cap: "payouts.view" },
   { prefix: "/admin/kyc", cap: "kyc.view" },
+  { prefix: "/admin/chat", cap: "chat.view" },
   { prefix: "/admin/rates", cap: "rates.view" },
   { prefix: "/admin/wallets", cap: "wallets.view" },
   { prefix: "/admin/assets", cap: "assets.view" },
