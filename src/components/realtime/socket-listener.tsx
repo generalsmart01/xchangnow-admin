@@ -7,6 +7,10 @@ import { toast } from "sonner";
 import { useSocket } from "@/lib/socket/socket-provider";
 import { notificationMeta } from "@/lib/notifications";
 import { playChime } from "@/lib/sound";
+import {
+  ensureNotificationPermission,
+  showDesktopNotification,
+} from "@/lib/desktop-notify";
 import type { AdminNotification } from "@/lib/types/notification";
 import type { ChatMessage } from "@/lib/types/chat";
 
@@ -41,6 +45,9 @@ export function SocketListener() {
   useEffect(() => {
     if (!socket) return;
 
+    // Ask for desktop-notification permission once when realtime comes online.
+    ensureNotificationPermission();
+
     // A new notification for this staff member.
     function onNotification(raw: Record<string, unknown>) {
       const type = (raw.eventType ?? raw.type) as string | undefined;
@@ -53,23 +60,32 @@ export function SocketListener() {
       void queryClient.invalidateQueries({ queryKey: ["notifications"] });
       invalidateForType(queryClient, type);
 
-      // The assignment notification only fires for the assignee — toast it.
+      const meta = notificationMeta({
+        id: "",
+        type: type ?? "",
+        title: null,
+        body: null,
+        payload,
+        isRead: false,
+        readAt: null,
+        createdAt: "",
+      } as AdminNotification);
+
+      const goToHref = meta.href ? () => router.push(meta.href as string) : undefined;
+
+      // OS toast when the operator has tabbed away.
+      showDesktopNotification({
+        title: meta.title,
+        body: meta.description,
+        tag: type,
+        onClick: goToHref,
+      });
+
+      // The assignment notification only fires for the assignee — in-app toast.
       if (type === "chat.conversation_assigned") {
-        const meta = notificationMeta({
-          id: "",
-          type,
-          title: null,
-          body: null,
-          payload,
-          isRead: false,
-          readAt: null,
-          createdAt: "",
-        } as AdminNotification);
         toast(meta.title, {
           description: meta.description,
-          action: meta.href
-            ? { label: "Open", onClick: () => router.push(meta.href as string) }
-            : undefined,
+          action: goToHref ? { label: "Open", onClick: goToHref } : undefined,
         });
       }
     }

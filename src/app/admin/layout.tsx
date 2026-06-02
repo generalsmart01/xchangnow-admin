@@ -3,6 +3,7 @@ import { CurrentUserProvider } from "@/lib/auth/current-user-context";
 import { ConfirmProvider } from "@/lib/hooks/use-confirm";
 import { SocketProvider } from "@/lib/socket/socket-provider";
 import { SocketListener } from "@/components/realtime/socket-listener";
+import { NotificationTitleSync } from "@/components/realtime/notification-title-sync";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { AdminTopbar } from "@/components/layout/admin-topbar";
 
@@ -12,6 +13,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <ConfirmProvider>
         <SocketProvider>
           <SocketListener />
+          <NotificationTitleSync />
           <div className="min-h-screen bg-background">
             <AdminSidebar />
             <div className="flex min-h-screen flex-col lg:pl-64">
