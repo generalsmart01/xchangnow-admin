@@ -17,18 +17,20 @@ export type KycDocumentType = (typeof KYC_DOCUMENT_TYPES)[number];
  */
 export type KycSubmission = {
   userId: string;
-  user: {
+  /** May be absent if the underlying user record is unavailable. */
+  user?: {
     email: string;
     firstName: string;
     lastName: string;
   } & Partial<AdminUser>;
   kycStatus: KycStatus;
-  documentType: KycDocumentType | string;
-  documentNumber: string;
-  documentImageUrl: string;
-  selfieImageUrl: string;
+  /** Document fields are populated on the detail endpoint; the queue may omit them. */
+  documentType?: KycDocumentType | string | null;
+  documentNumber?: string | null;
+  documentImageUrl?: string | null;
+  selfieImageUrl?: string | null;
   /** ISO date (no time), e.g. "1995-04-12". */
-  dateOfBirth: string;
+  dateOfBirth?: string | null;
   submittedAt: string | null;
   reviewedAt: string | null;
   reviewedById: string | null;

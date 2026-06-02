@@ -220,7 +220,7 @@ export default function DashboardPage() {
                 <span className="flex min-w-0 flex-col">
                   <span className="truncate font-medium">{fullName(k.user)}</span>
                   <span className="truncate text-xs text-muted-foreground">
-                    {k.user.email}
+                    {k.user?.email ?? "—"}
                   </span>
                 </span>
                 <span className="flex items-center gap-2">

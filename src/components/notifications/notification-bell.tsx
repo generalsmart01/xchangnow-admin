@@ -37,12 +37,15 @@ export function NotificationBell() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  // Poll the unread count even while the dropdown is closed.
+  // Poll the unread count even while the dropdown is closed. Don't retry or
+  // refetch-on-focus: if the endpoint is failing, one request per interval is
+  // plenty — retries + focus refetches turn a backend 500 into a request storm.
   const unread = useQuery({
     queryKey: ["notifications", "unread"],
     queryFn: getUnreadCount,
     refetchInterval: 60_000,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
+    retry: false,
   });
 
   // Only fetch the list when the dropdown is open.
@@ -50,6 +53,7 @@ export function NotificationBell() {
     queryKey: ["notifications", "list"],
     queryFn: () => listNotifications({ pageSize: 8 }),
     enabled: open,
+    retry: false,
   });
 
   const markRead = useMutationToast<unknown, string>(

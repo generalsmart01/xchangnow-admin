@@ -97,7 +97,7 @@ const columns: ColumnDef<KycSubmission>[] = [
       <div className="flex flex-col">
         <span className="text-sm font-medium">{fullName(row.original.user)}</span>
         <span className="text-xs text-muted-foreground">
-          {row.original.user.email}
+          {row.original.user?.email ?? "—"}
         </span>
       </div>
     ),
@@ -108,7 +108,7 @@ const columns: ColumnDef<KycSubmission>[] = [
       <div className="flex flex-col">
         <span className="text-sm">{smartLabel(row.original.documentType)}</span>
         <span className="font-mono text-xs text-muted-foreground">
-          {row.original.documentNumber}
+          {row.original.documentNumber ?? "—"}
         </span>
       </div>
     ),

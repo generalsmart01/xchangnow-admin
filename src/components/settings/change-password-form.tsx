@@ -6,7 +6,7 @@ import { z } from "zod";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import { changePassword } from "@/lib/api/account";
@@ -56,9 +56,8 @@ export function ChangePasswordForm() {
     >
       <div className="space-y-2">
         <Label htmlFor="currentPassword">Current password</Label>
-        <Input
+        <PasswordInput
           id="currentPassword"
-          type="password"
           autoComplete="current-password"
           {...register("currentPassword")}
         />
@@ -72,9 +71,8 @@ export function ChangePasswordForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="newPassword">New password</Label>
-          <Input
+          <PasswordInput
             id="newPassword"
-            type="password"
             autoComplete="new-password"
             {...register("newPassword")}
           />
@@ -86,9 +84,8 @@ export function ChangePasswordForm() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirm new password</Label>
-          <Input
+          <PasswordInput
             id="confirm"
-            type="password"
             autoComplete="new-password"
             {...register("confirm")}
           />

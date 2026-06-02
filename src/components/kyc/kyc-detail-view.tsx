@@ -18,8 +18,22 @@ import { smartLabel } from "@/lib/labels";
 import type { KycSubmission } from "@/lib/types/kyc";
 
 /** Sensitive value, masked until the admin explicitly reveals it. */
-function SensitiveField({ label, value }: { label: string; value: string }) {
+function SensitiveField({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | null | undefined;
+}) {
   const [shown, setShown] = useState(false);
+  if (!value) {
+    return (
+      <div className="space-y-1.5">
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="text-sm text-muted-foreground">—</p>
+      </div>
+    );
+  }
   return (
     <div className="space-y-1.5">
       <p className="text-sm text-muted-foreground">{label}</p>
@@ -43,7 +57,13 @@ function SensitiveField({ label, value }: { label: string; value: string }) {
   );
 }
 
-function DocImage({ label, url }: { label: string; url: string | null }) {
+function DocImage({
+  label,
+  url,
+}: {
+  label: string;
+  url: string | null | undefined;
+}) {
   if (!url) {
     return <p className="text-sm text-muted-foreground">No {label.toLowerCase()} submitted.</p>;
   }
@@ -83,7 +103,7 @@ export function KycDetailView({ kyc }: { kyc: KycSubmission }) {
             <CardContent>
               <DetailList>
                 <DetailRow label="Name">{fullName(kyc.user)}</DetailRow>
-                <DetailRow label="Email">{kyc.user.email}</DetailRow>
+                <DetailRow label="Email">{kyc.user?.email ?? "—"}</DetailRow>
                 <DetailRow label="Date of birth">{shortDate(kyc.dateOfBirth)}</DetailRow>
                 <DetailRow label="Document type">
                   {smartLabel(kyc.documentType)}
