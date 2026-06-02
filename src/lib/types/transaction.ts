@@ -100,7 +100,12 @@ export type TransactionsListResponse = {
 
 export type ApproveBody = { notes?: string };
 export type RejectBody = { reason: string };
-export type MarkCompletedBody = { outboundTxHash: string; notes?: string };
+export type MarkCompletedBody = {
+  outboundTxHash: string;
+  /** Required — proof the crypto was sent (TRANSACTION_PROOF upload). */
+  proofImageUrl: string;
+  notes?: string;
+};
 
 /** Display helpers for the asset/network embedded on a transaction. */
 export function assetOf(an?: EmbeddedAssetNetwork | null): EmbeddedAsset | undefined {

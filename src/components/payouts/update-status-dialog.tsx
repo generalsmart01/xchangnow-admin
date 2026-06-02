@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { ImageUploadField } from "@/components/shared/image-upload-field";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import { updatePayoutStatus } from "@/lib/api/payouts";
 import type { Payout, PayoutStatus, UpdatePayoutStatusBody } from "@/lib/types/payout";
@@ -31,7 +32,8 @@ export function UpdateStatusDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [notes, setNotes] = useState("");
+  const [proofImageUrl, setProofImageUrl] = useState("");
+  const [reference, setReference] = useState("");
   const [failureReason, setFailureReason] = useState("");
 
   const mutation = useMutationToast<Payout, UpdatePayoutStatusBody>(
@@ -49,7 +51,8 @@ export function UpdateStatusDialog({
         ["dashboard"],
       ],
       onSuccess: () => {
-        setNotes("");
+        setProofImageUrl("");
+        setReference("");
         setFailureReason("");
         onOpenChange(false);
       },
@@ -57,10 +60,15 @@ export function UpdateStatusDialog({
   );
 
   const failureValid = target !== "FAILED" || failureReason.trim().length >= 3;
+  // The bank receipt is required to mark a payout PAID (backend 400 otherwise).
+  const paidValid = target !== "PAID" || proofImageUrl !== "";
 
   function submit() {
     const body: UpdatePayoutStatusBody = { status: target };
-    if (target === "PAID" && notes.trim()) body.notes = notes.trim();
+    if (target === "PAID") {
+      body.proofImageUrl = proofImageUrl;
+      if (reference.trim()) body.reference = reference.trim();
+    }
     if (target === "FAILED") body.failureReason = failureReason.trim();
     mutation.mutate(body);
   }
@@ -79,7 +87,7 @@ export function UpdateStatusDialog({
       confirmText={`Set ${titleCase(target)}`}
       variant={target === "FAILED" ? "destructive" : "default"}
       loading={mutation.isPending}
-      disabled={!failureValid}
+      disabled={!failureValid || !paidValid}
       onConfirm={submit}
     >
       <div className="space-y-3">
@@ -94,15 +102,31 @@ export function UpdateStatusDialog({
         ) : null}
 
         {target === "PAID" ? (
-          <div className="space-y-2">
-            <Label htmlFor="paid-notes">Notes (optional)</Label>
-            <Input
-              id="paid-notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Sent via GTBank corporate at 14:32"
-            />
-          </div>
+          <>
+            <div className="space-y-2">
+              <Label>
+                Bank transfer receipt <span className="text-destructive">*</span>
+              </Label>
+              <ImageUploadField
+                value={proofImageUrl}
+                onChange={setProofImageUrl}
+                purpose="PAYOUT_RECEIPT"
+                buttonLabel="Upload receipt"
+              />
+              <p className="text-xs text-muted-foreground">
+                Required for reconciliation if the customer disputes payment.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="paid-reference">Bank reference (optional)</Label>
+              <Input
+                id="paid-reference"
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+                placeholder="BANK-TXN-9988"
+              />
+            </div>
+          </>
         ) : null}
 
         {target === "FAILED" ? (

@@ -5,6 +5,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUploadField } from "@/components/shared/image-upload-field";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import { markTransactionCompleted } from "@/lib/api/transactions";
 import type { MarkCompletedBody, Transaction } from "@/lib/types/transaction";
@@ -19,6 +20,7 @@ export function MarkCompletedDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const [outboundTxHash, setOutboundTxHash] = useState("");
+  const [proofImageUrl, setProofImageUrl] = useState("");
   const [notes, setNotes] = useState("");
 
   const mutation = useMutationToast<Transaction, MarkCompletedBody>(
@@ -32,13 +34,15 @@ export function MarkCompletedDialog({
       ],
       onSuccess: () => {
         setOutboundTxHash("");
+        setProofImageUrl("");
         setNotes("");
         onOpenChange(false);
       },
     },
   );
 
-  const valid = outboundTxHash.trim().length > 0;
+  // Both the outbound hash AND a proof image are now required.
+  const valid = outboundTxHash.trim().length > 0 && proofImageUrl !== "";
 
   return (
     <ConfirmDialog
@@ -57,6 +61,7 @@ export function MarkCompletedDialog({
       onConfirm={() =>
         mutation.mutate({
           outboundTxHash: outboundTxHash.trim(),
+          proofImageUrl,
           notes: notes.trim() || undefined,
         })
       }
@@ -70,10 +75,24 @@ export function MarkCompletedDialog({
             id="outbound-hash"
             value={outboundTxHash}
             onChange={(e) => setOutboundTxHash(e.target.value)}
-            placeholder="outbound-hash-9f8e…"
+            placeholder="0xabc1234…567890"
             className="font-mono"
             autoFocus
           />
+        </div>
+        <div className="space-y-2">
+          <Label>
+            Proof image <span className="text-destructive">*</span>
+          </Label>
+          <ImageUploadField
+            value={proofImageUrl}
+            onChange={setProofImageUrl}
+            purpose="TRANSACTION_PROOF"
+            buttonLabel="Upload proof"
+          />
+          <p className="text-xs text-muted-foreground">
+            Screenshot of the outbound send, for dispute reconciliation.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="completed-notes">Notes (optional)</Label>

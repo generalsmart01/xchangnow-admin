@@ -58,6 +58,9 @@ export type PayoutsListResponse = {
 /** PROCESSING: {status}. PAID: {status, notes?}. FAILED: {status, failureReason}. */
 export type UpdatePayoutStatusBody = {
   status: PayoutStatus;
+  /** Required when status=PAID — the bank transfer receipt (PAYOUT_RECEIPT upload). */
+  proofImageUrl?: string;
+  reference?: string;
   notes?: string;
   failureReason?: string;
 };

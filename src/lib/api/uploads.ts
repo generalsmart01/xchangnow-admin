@@ -5,7 +5,8 @@ import type { AnyEnvelope } from "@/lib/types/envelope";
 export type UploadPurpose =
   | "TRANSACTION_PROOF"
   | "KYC_SELFIE"
-  | "CHAT_ATTACHMENT";
+  | "CHAT_ATTACHMENT"
+  | "PAYOUT_RECEIPT";
 
 export type UploadResult = { url: string };
 
