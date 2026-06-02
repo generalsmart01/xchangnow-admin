@@ -61,11 +61,12 @@ export function UpdateStatusDialog({
 
   const failureValid = target !== "FAILED" || failureReason.trim().length >= 3;
   // The bank receipt is required to mark a payout PAID (backend 400 otherwise).
-  const paidValid = target !== "PAID" || proofImageUrl !== "";
+  const paidValid = target !== "PAID" || proofImageUrl.trim().length > 0;
 
   function submit() {
     const body: UpdatePayoutStatusBody = { status: target };
     if (target === "PAID") {
+      if (!proofImageUrl.trim()) return; // guard — receipt is required
       body.proofImageUrl = proofImageUrl;
       if (reference.trim()) body.reference = reference.trim();
     }

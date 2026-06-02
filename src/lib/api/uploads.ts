@@ -73,5 +73,17 @@ export async function uploadImage(
     );
   }
   if (!envelope.success) throw new ApiError(envelope, res.status);
-  return envelope.data;
+
+  // Tolerate common field-name variants, but guarantee a real URL string back —
+  // otherwise callers could silently send `undefined` to the API.
+  const data = envelope.data as Partial<UploadResult> & {
+    secureUrl?: string;
+    secure_url?: string;
+    imageUrl?: string;
+  };
+  const url = data?.url ?? data?.secureUrl ?? data?.secure_url ?? data?.imageUrl;
+  if (typeof url !== "string" || url === "") {
+    throw new Error("Upload succeeded but no image URL was returned.");
+  }
+  return { url };
 }

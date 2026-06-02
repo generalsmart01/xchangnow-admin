@@ -42,7 +42,8 @@ export function MarkCompletedDialog({
   );
 
   // Both the outbound hash AND a proof image are now required.
-  const valid = outboundTxHash.trim().length > 0 && proofImageUrl !== "";
+  const valid =
+    outboundTxHash.trim().length > 0 && proofImageUrl.trim().length > 0;
 
   return (
     <ConfirmDialog
