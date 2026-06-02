@@ -91,7 +91,7 @@ export default function StaffDetailPage() {
                   <DateTimeDisplay value={staff.lastLoginAt} />
                 </DetailRow>
                 <DetailRow label="Created">
-                  <DateTimeDisplay value={staff.createdAt} absolute />
+                  <DateTimeDisplay value={staff.createdAt} />
                 </DetailRow>
               </DetailList>
             </CardContent>

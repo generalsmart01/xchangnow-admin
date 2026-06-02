@@ -11,16 +11,17 @@ import { cn } from "@/lib/utils";
 type DateTimeDisplayProps = {
   value: string | Date | null | undefined;
   className?: string;
-  /** Show absolute date instead of relative as the primary text. */
-  absolute?: boolean;
+  /** Show relative ("3 hours ago") instead of the absolute date as primary text. */
+  relative?: boolean;
 };
 
-/** Relative time with the absolute timestamp on hover. */
+/** Absolute date + time, with the relative time on hover. */
 export function DateTimeDisplay({
   value,
   className,
-  absolute = false,
+  relative = false,
 }: DateTimeDisplayProps) {
+  const absolute = !relative;
   if (!value) return <span className={cn("text-muted-foreground", className)}>—</span>;
 
   const primary = absolute ? absoluteTime(value) : relativeTime(value);

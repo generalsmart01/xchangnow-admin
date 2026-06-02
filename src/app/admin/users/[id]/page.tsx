@@ -148,7 +148,7 @@ export default function UserDetailPage() {
                   {user.isEmailVerified ? "Yes" : "No"}
                 </DetailRow>
                 <DetailRow label="Member since">
-                  <DateTimeDisplay value={user.createdAt} absolute />
+                  <DateTimeDisplay value={user.createdAt} />
                 </DetailRow>
                 <DetailRow label="Last login">
                   <DateTimeDisplay value={user.lastLoginAt} />

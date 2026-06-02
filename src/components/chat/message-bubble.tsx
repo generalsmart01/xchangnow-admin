@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { absoluteTime, relativeTime } from "@/lib/format";
+import { absoluteTime } from "@/lib/format";
 import { ImagePreview } from "@/components/shared/image-preview";
 import { isImageUrl } from "@/lib/media";
 import type { ChatMessage } from "@/lib/types/chat";
@@ -54,7 +54,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
           )}
           title={absoluteTime(message.createdAt)}
         >
-          {isStaff ? "You / staff" : "Customer"} · {relativeTime(message.createdAt)}
+          {isStaff ? "You / staff" : "Customer"} · {absoluteTime(message.createdAt)}
         </p>
       </div>
     </div>

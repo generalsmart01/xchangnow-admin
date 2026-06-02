@@ -108,7 +108,6 @@ const columns: ColumnDef<AdminUser>[] = [
     cell: ({ row }) => (
       <DateTimeDisplay
         value={row.original.createdAt}
-        absolute
         className="text-sm text-muted-foreground"
       />
     ),

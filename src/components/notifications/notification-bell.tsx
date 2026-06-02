@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { relativeTime } from "@/lib/format";
+import { absoluteTime } from "@/lib/format";
 import { notificationMeta } from "@/lib/notifications";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import {
@@ -157,7 +157,7 @@ export function NotificationBell() {
                           </span>
                         ) : null}
                         <span className="block text-[11px] text-muted-foreground">
-                          {relativeTime(n.createdAt)}
+                          {absoluteTime(n.createdAt)}
                         </span>
                       </span>
                     </button>
