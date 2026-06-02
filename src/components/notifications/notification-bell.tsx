@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Bell, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck, Volume2, VolumeX } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +21,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from "@/lib/api/notifications";
+import { isChimeMuted, setChimeMuted } from "@/lib/sound";
 import type { AdminNotification } from "@/lib/types/notification";
 
 const ICON_TONE: Record<string, string> = {
@@ -36,6 +37,18 @@ const ICON_TONE: Record<string, string> = {
 export function NotificationBell() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [muted, setMuted] = useState(false);
+
+  // Read the persisted sound preference on mount (localStorage is client-only;
+  // deferring to an effect avoids a hydration mismatch on the icon).
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setMuted(isChimeMuted()), []);
+
+  function toggleMuted() {
+    const next = !muted;
+    setChimeMuted(next);
+    setMuted(next);
+  }
 
   // Poll the unread count even while the dropdown is closed. Don't retry or
   // refetch-on-focus: if the endpoint is failing, one request per interval is
@@ -99,15 +112,31 @@ export function NotificationBell() {
       <DropdownMenuContent align="end" className="w-[360px] p-0">
         <div className="flex items-center justify-between border-b px-3 py-2">
           <span className="text-sm font-semibold">Notifications</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 gap-1.5 text-xs"
-            disabled={markAll.isPending || count === 0}
-            onClick={() => markAll.mutate()}
-          >
-            <CheckCheck className="size-3.5" /> Mark all read
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              onClick={toggleMuted}
+              aria-label={muted ? "Unmute notification sound" : "Mute notification sound"}
+              title={muted ? "Sound off" : "Sound on"}
+            >
+              {muted ? (
+                <VolumeX className="size-4 text-muted-foreground" />
+              ) : (
+                <Volume2 className="size-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1.5 text-xs"
+              disabled={markAll.isPending || count === 0}
+              onClick={() => markAll.mutate()}
+            >
+              <CheckCheck className="size-3.5" /> Mark all read
+            </Button>
+          </div>
         </div>
 
         <div className="max-h-[60vh] overflow-y-auto">

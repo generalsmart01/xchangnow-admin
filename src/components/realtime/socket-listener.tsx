@@ -6,6 +6,7 @@ import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSocket } from "@/lib/socket/socket-provider";
 import { notificationMeta } from "@/lib/notifications";
+import { playChime } from "@/lib/sound";
 import type { AdminNotification } from "@/lib/types/notification";
 import type { ChatMessage } from "@/lib/types/chat";
 
@@ -44,6 +45,9 @@ export function SocketListener() {
     function onNotification(raw: Record<string, unknown>) {
       const type = (raw.eventType ?? raw.type) as string | undefined;
       const payload = (raw.payload ?? raw) as Record<string, unknown> | null;
+
+      // Audible alert for every incoming notification (respects mute pref).
+      playChime();
 
       // Refresh the bell (unread count + list) and any affected screens.
       void queryClient.invalidateQueries({ queryKey: ["notifications"] });
