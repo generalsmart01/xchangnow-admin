@@ -2,8 +2,11 @@ import {
   ArrowLeftRight,
   Bell,
   IdCard,
+  MessageSquarePlus,
+  MessagesSquare,
   ServerCrash,
   ShieldAlert,
+  UserCheck,
   type LucideIcon,
 } from "lucide-react";
 import type { Tone } from "@/components/shared/tone-badge";
@@ -64,6 +67,36 @@ export function notificationMeta(n: AdminNotification): NotificationMeta {
         title: "New KYC submission",
         description: `${who} submitted identity documents`,
         href: userId ? `/admin/kyc/${userId}` : "/admin/kyc?status=PENDING",
+      };
+    }
+    case "chat.conversation_opened": {
+      const convId = field(p, "conversationId");
+      return {
+        icon: MessagesSquare,
+        tone: "info",
+        title: "New support conversation",
+        description: "A customer opened a conversation — claim it from the queue",
+        href: convId ? `/admin/chat/${convId}` : "/admin/chat",
+      };
+    }
+    case "chat.conversation_assigned": {
+      const convId = field(p, "conversationId");
+      return {
+        icon: UserCheck,
+        tone: "brand",
+        title: "You've been assigned a conversation",
+        description: "A support conversation was assigned to you",
+        href: convId ? `/admin/chat/${convId}` : "/admin/chat",
+      };
+    }
+    case "chat.user_message": {
+      const convId = field(p, "conversationId");
+      return {
+        icon: MessageSquarePlus,
+        tone: "info",
+        title: "New message from customer",
+        description: "A customer replied in a conversation",
+        href: convId ? `/admin/chat/${convId}` : "/admin/chat",
       };
     }
     case "system.coingecko_failed": {

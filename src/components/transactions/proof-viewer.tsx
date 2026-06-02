@@ -3,7 +3,10 @@
 import { ExternalLink, FileText, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ImagePreview } from "@/components/shared/image-preview";
 import { explorerName, explorerTxUrl } from "@/lib/explorer";
+import { isImageUrl } from "@/lib/media";
+import { smartLabel } from "@/lib/labels";
 import type { TransactionProof } from "@/lib/types/transaction";
 
 type ExplorerInfo = {
@@ -53,16 +56,34 @@ function ReceiptProof({ proof }: { proof: TransactionProof }) {
     <div className="space-y-2 rounded-lg border p-3">
       <div className="flex items-center gap-2 text-sm font-medium">
         <ImageIcon className="size-4 text-muted-foreground" />
-        Bank transfer receipt
+        {proof.type === "BANK_TRANSFER_RECEIPT" ? "Bank transfer receipt" : "Attachment"}
       </div>
-      <a href={proof.url} target="_blank" rel="noopener noreferrer" className="block">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={proof.url}
-          alt="Bank transfer receipt"
-          className="max-h-96 w-full rounded-md border object-contain"
-        />
-      </a>
+      <ImagePreview
+        src={proof.url}
+        alt="Proof attachment"
+        imgClassName="max-h-96 w-full"
+      />
+      {proof.notes ? (
+        <p className="text-xs text-muted-foreground">{proof.notes}</p>
+      ) : null}
+    </div>
+  );
+}
+
+/** Non-image proof (e.g. an OTHER proof carrying an outbound tx hash). */
+function GenericProof({ proof }: { proof: TransactionProof }) {
+  return (
+    <div className="space-y-2 rounded-lg border p-3">
+      <div className="flex items-center gap-2 text-sm font-medium">
+        <FileText className="size-4 text-muted-foreground" />
+        {smartLabel(proof.type)}
+      </div>
+      <div className="flex items-center gap-2">
+        <code className="min-w-0 flex-1 truncate rounded bg-muted px-2 py-1.5 font-mono text-xs">
+          {proof.url}
+        </code>
+        <CopyButton value={proof.url} label="Value" />
+      </div>
       {proof.notes ? (
         <p className="text-xs text-muted-foreground">{proof.notes}</p>
       ) : null}
@@ -87,13 +108,18 @@ export function ProofViewer({
 
   return (
     <div className="space-y-3">
-      {proofs.map((proof) =>
-        proof.type === "CRYPTO_TX_HASH" ? (
-          <CryptoHashProof key={proof.id} proof={proof} explorer={explorer} />
-        ) : (
+      {proofs.map((proof) => {
+        if (proof.type === "CRYPTO_TX_HASH") {
+          return <CryptoHashProof key={proof.id} proof={proof} explorer={explorer} />;
+        }
+        // Only render as an image when the value is actually an image URL —
+        // an OTHER proof may carry an outbound tx hash, not a Cloudinary URL.
+        return isImageUrl(proof.url) ? (
           <ReceiptProof key={proof.id} proof={proof} />
-        ),
-      )}
+        ) : (
+          <GenericProof key={proof.id} proof={proof} />
+        );
+      })}
     </div>
   );
 }

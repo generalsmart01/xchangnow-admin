@@ -2,15 +2,39 @@
 
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
-import { MessagesSquare } from "lucide-react";
+import { Loader2, MessagesSquare } from "lucide-react";
 
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Button } from "@/components/ui/button";
 import { DateTimeDisplay } from "@/components/shared/datetime-display";
 import { ConversationStatusBadge } from "./conversation-status-badge";
+import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
+import { assignConversation } from "@/lib/api/chat";
 import { isStaffUnread, partyName } from "@/lib/chat-display";
 import { cn } from "@/lib/utils";
 import type { ChatConversation } from "@/lib/types/chat";
+
+/** Inline "Claim" button shown on PENDING_STAFF rows. */
+function ClaimButton({ conversation }: { conversation: ChatConversation }) {
+  const claim = useMutationToast<ChatConversation, void>(
+    () => assignConversation(conversation.id).then((r) => r.data),
+    { successMessage: "Conversation claimed", invalidate: [["conversations"]] },
+  );
+  return (
+    <Button
+      size="sm"
+      disabled={claim.isPending}
+      onClick={(e) => {
+        e.stopPropagation();
+        claim.mutate();
+      }}
+    >
+      {claim.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+      Claim
+    </Button>
+  );
+}
 
 const columns: ColumnDef<ChatConversation>[] = [
   {
@@ -61,7 +85,7 @@ const columns: ColumnDef<ChatConversation>[] = [
       row.original.assignedStaff ? (
         <span className="text-sm">{partyName(row.original.assignedStaff)}</span>
       ) : (
-        <span className="text-sm text-muted-foreground">Unassigned</span>
+        <span className="text-sm text-muted-foreground italic">— unassigned —</span>
       ),
   },
   {
@@ -72,6 +96,16 @@ const columns: ColumnDef<ChatConversation>[] = [
         className="text-sm text-muted-foreground"
       />
     ),
+  },
+  {
+    header: "",
+    id: "actions",
+    cell: ({ row }) =>
+      row.original.status === "PENDING_STAFF" ? (
+        <div className="text-right">
+          <ClaimButton conversation={row.original} />
+        </div>
+      ) : null,
   },
 ];
 

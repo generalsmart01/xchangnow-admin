@@ -12,6 +12,9 @@ export const ADMIN_NOTIFICATION_TYPES = [
   "kyc.submitted",
   "system.coingecko_failed",
   "bootstrap.attempted",
+  "chat.conversation_opened",
+  "chat.conversation_assigned",
+  "chat.user_message",
 ] as const;
 export type AdminNotificationType =
   | (typeof ADMIN_NOTIFICATION_TYPES)[number]

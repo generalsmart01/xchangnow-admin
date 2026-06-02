@@ -19,11 +19,13 @@ import { MessageThread } from "@/components/chat/message-thread";
 import { ReplyComposer } from "@/components/chat/reply-composer";
 import { getConversation, markConversationRead } from "@/lib/api/chat";
 import { isStaffUnread, partyName } from "@/lib/chat-display";
+import { useAuth } from "@/lib/hooks/use-auth";
 import { ApiError } from "@/lib/api/client";
 
 export default function ConversationPage() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const readForId = useRef<string | null>(null);
 
   const { data: conversation, isLoading, error } = useQuery({
@@ -69,7 +71,19 @@ export default function ConversationPage() {
     );
   }
 
-  const isClosed = conversation.status === "CLOSED";
+  // Claim-first gating: only the assigned staff may reply, and only while OPEN.
+  const mine = conversation.assignedStaffId === user.id;
+  const canReply = conversation.status === "OPEN" && mine;
+  const replyDisabledHint =
+    conversation.status === "PENDING_STAFF"
+      ? "Claim this conversation to reply."
+      : conversation.status === "CLOSED"
+        ? "This conversation is closed — no new messages can be sent."
+        : conversation.status === "RESOLVED"
+          ? "Resolved — the customer can reopen it by sending a message."
+          : !mine
+            ? "Only the assigned staff can reply."
+            : "You can't reply right now.";
 
   return (
     <div className="space-y-5">
@@ -97,8 +111,8 @@ export default function ConversationPage() {
 
           <ReplyComposer
             conversationId={conversation.id}
-            disabled={isClosed}
-            disabledHint="This conversation is closed — no new messages can be sent."
+            disabled={!canReply}
+            disabledHint={replyDisabledHint}
           />
         </div>
 

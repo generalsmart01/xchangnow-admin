@@ -15,7 +15,7 @@ export default function KycPage() {
   const q = usePaginatedQuery({
     queryKey: "kyc",
     filterKeys: ["status"],
-    defaults: { status: "PENDING" },
+    defaults: { status: "" },
     fetcher: (p) =>
       listKyc({
         page: p.page,
@@ -51,7 +51,10 @@ export default function KycPage() {
         />
       </FilterBar>
 
-      <KycQueueTable submissions={data?.submissions ?? []} loading={q.isLoading} />
+      <KycQueueTable
+        submissions={data?.submissions ?? []}
+        loading={q.isLoading}
+      />
 
       {data ? (
         <Pagination

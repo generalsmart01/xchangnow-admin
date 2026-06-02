@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import { absoluteTime, relativeTime } from "@/lib/format";
+import { ImagePreview } from "@/components/shared/image-preview";
+import { isImageUrl } from "@/lib/media";
 import type { ChatMessage } from "@/lib/types/chat";
 
 /** One chat message. Staff messages sit on the right, customer on the left. */
@@ -20,19 +22,28 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
           {message.body ? (
             <p className="whitespace-pre-wrap break-words">{message.body}</p>
           ) : null}
-          {message.attachmentUrl ? (
+          {isImageUrl(message.attachmentUrl) ? (
+            <div
+              className={cn(
+                "mt-1.5",
+                message.body && "border-t pt-1.5",
+                isStaff && "border-primary-foreground/20",
+              )}
+            >
+              <ImagePreview
+                src={message.attachmentUrl}
+                alt="Attachment"
+                imgClassName="max-h-48 w-auto"
+              />
+            </div>
+          ) : message.attachmentUrl ? (
             <a
               href={message.attachmentUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={cn("mt-1.5 block", message.body && "border-t pt-1.5", isStaff && "border-primary-foreground/20")}
+              className="mt-1.5 block text-xs underline opacity-90"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={message.attachmentUrl}
-                alt="Attachment"
-                className="max-h-48 w-auto rounded-md border object-cover"
-              />
+              View attachment
             </a>
           ) : null}
         </div>

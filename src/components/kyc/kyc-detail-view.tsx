@@ -13,7 +13,9 @@ import { KycStatusBadge } from "./kyc-status-badge";
 import { KycApproveButton } from "./kyc-approve-button";
 import { KycRejectDialog } from "./kyc-reject-dialog";
 import { RoleGate } from "@/components/layout/role-gate";
+import { ImagePreview } from "@/components/shared/image-preview";
 import { fullName } from "@/lib/format";
+import { isImageUrl } from "@/lib/media";
 import type { KycDetail } from "@/lib/types/kyc";
 
 /** Sensitive value, masked until the admin explicitly reveals it. */
@@ -63,19 +65,10 @@ function DocImage({
   label: string;
   url: string | null | undefined;
 }) {
-  if (!url) {
+  if (!isImageUrl(url)) {
     return <p className="text-sm text-muted-foreground">No {label.toLowerCase()} submitted.</p>;
   }
-  return (
-    <a href={url} target="_blank" rel="noopener noreferrer" className="block">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={url}
-        alt={label}
-        className="aspect-square w-full rounded-md border object-cover"
-      />
-    </a>
-  );
+  return <ImagePreview src={url} alt={label} imgClassName="aspect-square w-full" />;
 }
 
 export function KycDetailView({ kyc }: { kyc: KycDetail }) {

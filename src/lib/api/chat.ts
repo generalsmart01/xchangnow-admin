@@ -40,9 +40,18 @@ export function sendMessage(id: string, body: SendMessageBody) {
   return apiPost<ChatMessage>(`${BASE}/${id}/messages`, body);
 }
 
-/** Claim the conversation (assignedStaffId = caller). */
-export function assignConversation(id: string) {
-  return apiPatch<ChatConversation>(`${BASE}/${id}/assign`);
+/**
+ * Assign a conversation (PENDING_STAFF → OPEN). With no body, claims it for the
+ * caller; with `{ staffId }`, dispatches it to another staff member. Notifies
+ * the assignee (in-app + email + realtime).
+ */
+export type AssignConversationBody = { staffId?: string };
+
+export function assignConversation(
+  id: string,
+  body: AssignConversationBody = {},
+) {
+  return apiPatch<ChatConversation>(`${BASE}/${id}/assign`, body);
 }
 
 export function resolveConversation(id: string) {
