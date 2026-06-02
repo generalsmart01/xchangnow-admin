@@ -15,7 +15,6 @@ export default function KycPage() {
   const q = usePaginatedQuery({
     queryKey: "kyc",
     filterKeys: ["status"],
-    defaults: { status: "" },
     fetcher: (p) =>
       listKyc({
         page: p.page,

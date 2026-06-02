@@ -13,7 +13,6 @@ export default function PayoutsPage() {
   const q = usePaginatedQuery({
     queryKey: "payouts",
     filterKeys: ["status"],
-    defaults: { status: "PENDING" },
     fetcher: (p) =>
       listPayouts({
         page: p.page,

@@ -21,7 +21,6 @@ export default function TransactionsPage() {
   const q = usePaginatedQuery({
     queryKey: "transactions",
     filterKeys: ["status", "type", "assetId"],
-    defaults: { status: "UNDER_REVIEW" },
     fetcher: (p) =>
       listTransactions({
         page: p.page,
