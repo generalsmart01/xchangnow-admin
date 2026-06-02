@@ -1,10 +1,9 @@
 import { apiGet, apiPost, qs } from "./client";
 import type {
   KycApproveBody,
+  KycDetail,
   KycQueueResponse,
   KycRejectBody,
-  KycReviewResult,
-  KycSubmission,
   KycStatus,
 } from "@/lib/types/kyc";
 
@@ -18,15 +17,15 @@ export function listKyc(params: ListKycParams) {
   return apiGet<KycQueueResponse>(`/kyc${qs(params)}`);
 }
 
-/** Fetches the full submission (document + selfie URLs) — writes a PII access log. */
+/** Fetches the decrypted BVN/NIN + selfie — writes a PII access log. */
 export function getKycDetail(userId: string) {
-  return apiGet<KycSubmission>(`/kyc/${userId}`);
+  return apiGet<KycDetail>(`/kyc/${userId}`);
 }
 
 export function approveKyc(userId: string, body: KycApproveBody = {}) {
-  return apiPost<KycReviewResult>(`/kyc/${userId}/approve`, body);
+  return apiPost<KycDetail>(`/kyc/${userId}/approve`, body);
 }
 
 export function rejectKyc(userId: string, body: KycRejectBody) {
-  return apiPost<KycReviewResult>(`/kyc/${userId}/reject`, body);
+  return apiPost<KycDetail>(`/kyc/${userId}/reject`, body);
 }

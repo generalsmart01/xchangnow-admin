@@ -1,40 +1,21 @@
-import type { AdminUser } from "./user";
-
 export const KYC_STATUSES = ["PENDING", "APPROVED", "REJECTED", "NONE"] as const;
 export type KycStatus = (typeof KYC_STATUSES)[number];
 
-export const KYC_DOCUMENT_TYPES = [
-  "DRIVERS_LICENSE",
-  "NATIONAL_ID",
-  "PASSPORT",
-  "VOTERS_CARD",
-] as const;
-export type KycDocumentType = (typeof KYC_DOCUMENT_TYPES)[number];
-
 /**
- * A KYC submission. The queue embeds a minimal user; the detail endpoint joins
- * the full SafeUser. Fetching the detail writes a pii_access_logs READ row.
+ * A KYC submission row (queue). The backend returns the applicant's identity
+ * fields flat (not nested under `user`) and BVN/NIN presence flags. The
+ * decrypted BVN/NIN + selfie live on the detail endpoint (`KycDetail`).
  */
 export type KycSubmission = {
   userId: string;
-  /** May be absent if the underlying user record is unavailable. */
-  user?: {
-    email: string;
-    firstName: string;
-    lastName: string;
-  } & Partial<AdminUser>;
-  kycStatus: KycStatus;
-  /** Document fields are populated on the detail endpoint; the queue may omit them. */
-  documentType?: KycDocumentType | string | null;
-  documentNumber?: string | null;
-  documentImageUrl?: string | null;
-  selfieImageUrl?: string | null;
-  /** ISO date (no time), e.g. "1995-04-12". */
-  dateOfBirth?: string | null;
+  email: string;
+  firstName: string;
+  lastName: string;
+  status: KycStatus;
   submittedAt: string | null;
   reviewedAt: string | null;
-  reviewedById: string | null;
-  rejectedReason?: string | null;
+  hasBvn: boolean;
+  hasNin: boolean;
 };
 
 export type KycQueueResponse = {
@@ -44,13 +25,16 @@ export type KycQueueResponse = {
   pageSize: number;
 };
 
-/** Returned by approve/reject — the post-review state. */
-export type KycReviewResult = {
-  userId: string;
-  kycStatus: KycStatus;
-  reviewedAt: string;
-  reviewedById: string;
-  rejectedReason?: string | null;
+/**
+ * Full detail — includes DECRYPTED bvn/nin + selfie. Fetching this writes a
+ * pii_access_logs READ row on the backend (the most audit-worthy read).
+ */
+export type KycDetail = KycSubmission & {
+  reviewedById: string | null;
+  bvn: string | null;
+  nin: string | null;
+  selfieUrl: string | null;
+  rejectionReason: string | null;
 };
 
 export type KycApproveBody = { notes?: string };

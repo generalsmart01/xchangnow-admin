@@ -17,21 +17,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { RoleGate } from "@/components/layout/role-gate";
+import { ToneBadge } from "@/components/shared/tone-badge";
 import { KycStatusBadge } from "./kyc-status-badge";
 import { KycRejectDialog } from "./kyc-reject-dialog";
 import { DateTimeDisplay } from "@/components/shared/datetime-display";
 import { useMutationToast } from "@/lib/hooks/use-mutation-toast";
 import { approveKyc } from "@/lib/api/kyc";
 import { fullName } from "@/lib/format";
-import { smartLabel } from "@/lib/labels";
-import type { KycReviewResult, KycSubmission } from "@/lib/types/kyc";
+import type { KycDetail, KycSubmission } from "@/lib/types/kyc";
 
 function RowActions({ submission }: { submission: KycSubmission }) {
   const router = useRouter();
   const [dialog, setDialog] = useState<"approve" | "reject" | null>(null);
-  const isPending = submission.kycStatus === "PENDING";
+  const isPending = submission.status === "PENDING";
 
-  const approve = useMutationToast<KycReviewResult, void>(
+  const approve = useMutationToast<KycDetail, void>(
     () => approveKyc(submission.userId).then((r) => r.data),
     {
       successMessage: "KYC submission approved",
@@ -95,27 +95,25 @@ const columns: ColumnDef<KycSubmission>[] = [
     header: "Applicant",
     cell: ({ row }) => (
       <div className="flex flex-col">
-        <span className="text-sm font-medium">{fullName(row.original.user)}</span>
+        <span className="text-sm font-medium">{fullName(row.original)}</span>
         <span className="text-xs text-muted-foreground">
-          {row.original.user?.email ?? "—"}
+          {row.original.email}
         </span>
       </div>
     ),
   },
   {
-    header: "Document",
+    header: "Documents",
     cell: ({ row }) => (
-      <div className="flex flex-col">
-        <span className="text-sm">{smartLabel(row.original.documentType)}</span>
-        <span className="font-mono text-xs text-muted-foreground">
-          {row.original.documentNumber ?? "—"}
-        </span>
+      <div className="flex gap-1.5">
+        <ToneBadge tone={row.original.hasBvn ? "success" : "muted"}>BVN</ToneBadge>
+        <ToneBadge tone={row.original.hasNin ? "success" : "muted"}>NIN</ToneBadge>
       </div>
     ),
   },
   {
     header: "Status",
-    cell: ({ row }) => <KycStatusBadge status={row.original.kycStatus} />,
+    cell: ({ row }) => <KycStatusBadge status={row.original.status} />,
   },
   {
     header: "Submitted",
