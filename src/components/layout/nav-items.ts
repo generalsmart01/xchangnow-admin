@@ -27,16 +27,41 @@ export type NavItem = {
 
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard, exact: true },
-  { label: "Transactions", href: "/admin/transactions", icon: ArrowLeftRight, cap: "transactions.view" },
-  { label: "Payouts", href: "/admin/payouts", icon: Banknote, cap: "payouts.view" },
+  {
+    label: "Transactions",
+    href: "/admin/transactions",
+    icon: ArrowLeftRight,
+    cap: "transactions.view",
+  },
+  {
+    label: "Payouts",
+    href: "/admin/payouts",
+    icon: Banknote,
+    cap: "payouts.view",
+  },
   { label: "Users", href: "/admin/users", icon: Users, cap: "users.view" },
   { label: "KYC", href: "/admin/kyc", icon: IdCard, cap: "kyc.view" },
-  { label: "Support", href: "/admin/chat", icon: MessagesSquare, cap: "chat.view" },
+  {
+    label: "Support",
+    href: "/admin/chat",
+    icon: MessagesSquare,
+    cap: "chat.view",
+  },
   { label: "Rates", href: "/admin/rates", icon: LineChart, cap: "rates.view" },
-  { label: "Wallets", href: "/admin/wallets", icon: Wallet, cap: "wallets.view" },
+  {
+    label: "Wallets",
+    href: "/admin/wallets",
+    icon: Wallet,
+    cap: "wallets.view",
+  },
   { label: "Assets", href: "/admin/assets", icon: Coins, cap: "assets.view" },
-  { label: "Networks", href: "/admin/networks", icon: Network, cap: "networks.view" },
-  { label: "Staff", href: "/admin/staff", icon: UserCog, cap: "staff.list" },
+  {
+    label: "Networks",
+    href: "/admin/networks",
+    icon: Network,
+    cap: "networks.view",
+  },
+  // { label: "Staff", href: "/admin/staff", icon: UserCog, cap: "staff.list" },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
