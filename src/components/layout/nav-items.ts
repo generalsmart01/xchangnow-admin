@@ -61,7 +61,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Network,
     cap: "networks.view",
   },
-  // { label: "Staff", href: "/admin/staff", icon: UserCog, cap: "staff.list" },
+  { label: "Staff", href: "/admin/staff", icon: UserCog, cap: "staff.list" },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
