@@ -122,7 +122,7 @@ export function StaffTable({
       data={staff}
       loading={loading}
       getRowId={(s) => s.id}
-      onRowClick={(s) => router.push(`/users/${s.id}`)}
+      onRowClick={(s) => router.push(`/admin/users/${s.id}`)}
       emptyState={
         <EmptyState
           icon={UserCog}
