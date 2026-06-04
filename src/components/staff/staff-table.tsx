@@ -42,7 +42,9 @@ function RowActions({ staff }: { staff: StaffMember }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenuItem onSelect={() => router.push(`/admin/staff/${staff.id}`)}>
+          <DropdownMenuItem
+            onSelect={() => router.push(`/admin/staff/${staff.id}`)}
+          >
             <Eye className="size-4" /> View details
           </DropdownMenuItem>
           <RoleGate cap="staff.changeRole">
@@ -57,7 +59,11 @@ function RowActions({ staff }: { staff: StaffMember }) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ChangeRoleDialog staff={staff} open={roleOpen} onOpenChange={setRoleOpen} />
+      <ChangeRoleDialog
+        staff={staff}
+        open={roleOpen}
+        onOpenChange={setRoleOpen}
+      />
     </>
   );
 }
@@ -68,7 +74,9 @@ const columns: ColumnDef<StaffMember>[] = [
     cell: ({ row }) => (
       <div className="flex flex-col">
         <span className="text-sm font-medium">{fullName(row.original)}</span>
-        <span className="text-xs text-muted-foreground">{row.original.email}</span>
+        <span className="text-xs text-muted-foreground">
+          {row.original.email}
+        </span>
       </div>
     ),
   },
@@ -114,7 +122,7 @@ export function StaffTable({
       data={staff}
       loading={loading}
       getRowId={(s) => s.id}
-      onRowClick={(s) => router.push(`/admin/staff/${s.id}`)}
+      onRowClick={(s) => router.push(`/users/${s.id}`)}
       emptyState={
         <EmptyState
           icon={UserCog}
